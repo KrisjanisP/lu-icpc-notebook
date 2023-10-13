@@ -1,5 +1,5 @@
 #set text(size: 8pt,font: "New Computer Modern",)
-#set page(paper: "a4",flipped: true,margin: (x:1cm,y:1cm))
+#set page(paper: "a4",flipped: true,margin: (x:1cm,y:1cm), numbering: "1 / 1")
 #set par(justify: true)
 #set document(title: "LU ICPC kladīte ;)",author: ("Krišjānis Petručeņa","Matīss Kristiņš", "Valters Kalniņš"))
 
