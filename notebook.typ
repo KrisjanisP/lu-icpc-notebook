@@ -523,31 +523,23 @@ for (int i = 0; i < n; ++i) if (!num[i])
 
 == Dinic's max flow / matching
 
+Time complexity:
+- generally: $O(E V^2)$
+- small flow: $O(F (V + E))$
+- bipartite graph or unit flow: $O(E sqrt(V))$
+Usage:
+- dinic()
+- add_edge(from, to, capacity)   
+- recover() (optional) 
+
 ```cpp
-// Dinic - O(V^2 * E)
-// Bipartite graph or unit flow - O(sqrt(V) * E)
-// Small flow - O(F * (V + E))
-// USE INF = 1e9!
-
-/**********************************************************************************
-* DINIC (FIND MAX FLOW / BIPARTITE MATCHING)                                      *
-* Time complexity: O(EV^2)                                                        *
-* Usage: dinic()                                                                  *
-*        add_edge(from, to, capacity)                                             *
-* Testcase:                                                                       *
-* add_edge(src, 1, 1);   add_edge(1, snk, 1);   add_edge(2, 3, INF);              *
-* add_edge(src, 2, 1);   add_edge(2, snk, 1);   add_edge(3, 4, INF);              *
-* add_edge(src, 2, 1);   add_edge(3, snk, 1);                                     *
-* add_edge(src, 2, 1);   add_edge(4, snk, 1);   => dinic() = 4                    *
-**********************************************************************************/
-
 #include <bits/stdc++.h>
 using namespace std;
 
 const int N = 1e5+1, INF = 1e9;
 struct edge {int v, c, f;};
 
-int n, src, snk, h[N], ptr[N];
+int src, snk, h[N], ptr[N];
 vector<edge> edgs;
 vector<int> g[N];
 
@@ -620,33 +612,44 @@ void recover(){
   }
 }
 
-/***********************************************************************************************
-* FLOW WITH DEMANDS                                                                            *
-*                                                                                              *
-* 1 - Finding an arbitrary flow                                                                *
-* Assume a network with [L, R] on edges (some may have L = 0), let's call it old network.      *
-* Create a New Source and New Sink (this will be the src and snk for Dinic).                   *
-* Modelling Network:                                                                           *
-* 1) Every edge from the old network will have cost R - L                                      *
-* 2) Add an edge from New Source to every vertex v with cost:                                  *
-*    Sum(L) for every (u, v). (sum all L that LEAVES v)                                        *
-* 3) Add an edge from every vertex v to New Sink with cost:                                    *
-*    Sum(L) for every (v, w). (sum all L that ARRIVES v)                                       *
-* 4) Add an edge from Old Source to Old Sink with cost INF (circulation problem)               *
-* The Network will be valid if and only if the flow saturates the network (max flow == sum(L)) *
-*                                                                                              *
-* 2 - Finding Min Flow                                                                         *
-* To find min flow that satisfies just do a binary search in the (Old Sink -> Old Source) edge *
-* The cost of this edge represents all the flow from old network                               *
-* Min flow = Sum(L) that arrives in Old Sink + flow that leaves (Old Sink -> Old Source)       *
-************************************************************************************************/
-
 
 int main () {
-    clear();
-    return 0;
+    // TEST CASE
+    d::clear();
+    d::add_edge(d::src,1,1);
+    d::add_edge(d::src,2,1);
+    d::add_edge(d::src,2,1);
+    d::add_edge(d::src,2,1);
+
+    d::add_edge(2,3,d::INF);
+    d::add_edge(3,4,d::INF);
+
+    d::add_edge(1,d::snk,1);
+    d::add_edge(2,d::snk,1);
+    d::add_edge(3,d::snk,1);
+    d::add_edge(4,d::snk,1);
+    cout<<d::dinic()<<endl; // SHOULD OUTPUT 4
+    d::recover();
 }
 ```
+== Flow with demands
+
+Finding an arbitrary flow
+- Assume a network with $[L;R]$ on edges (some may have $L = 0$), let's call it old network.
+- Create a New Source and New Sink (this will be the src and snk for Dinic).
+- Modelling network:
+  + Every edge from the old network will have cost $R - L$
+  + Add an edge from New Source to every vertex $v$ with cost:
+    - $S(L)$ for every $(u, v)$. (sum all $L$ that LEAVES $v$)
+  + Add an edge from every vertex $v$ to New Sink with cost:
+    - $S(L)$ for every $(v, w)$. (sum all $L$ that ARRIVES $v$)
+  + Add an edge from Old Source to Old Sink with cost INF (circulation problem)
+- The Network will be valid if and only if the flow saturates the network (max flow == $S(L)$)
+
+Finding Min Flow
+- To find min flow that satisfies just do a binary search in the (Old Sink -> Old Source) edge
+- The cost of this edge represents all the flow from old network
+- Min flow = $S(L)$ that arrives in Old Sink + flow that leaves (Old Sink -> Old Source)
 
 == Kosaraju's algorithm
 
