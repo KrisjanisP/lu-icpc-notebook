@@ -6,7 +6,7 @@
 #show: columns.with(3, gutter: 1em)
 
 #align(center)[#block(text(weight: 700, 1.75em, "LU ICPC kladīte ;)"))]
-#outline()
+#outline(indent: 2em)
 = Algebra
 == Sum formulas
 $ (a+b)^2=a^2 + 2"ab" + b^2 $
