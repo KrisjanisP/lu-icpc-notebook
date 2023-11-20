@@ -882,11 +882,18 @@ void rabin() {
 }
 ```
 
+#block( breakable: false,[
+  
 == Z-function
 
-```cpp
-// Z-Function - O(n)
+The Z-function of a string $s$ is an array $z$ where $z_i$ is the length of the longest substring starting from $s_i$ which is also a prefix of $s$.
 
+Examples:
+- "aaaaa": $[0, 4, 3, 2, 1]$
+- "aaabaab": $[0,2,1,0,2,1,0]$
+- "abacaba": $[0,0,1,0,3,0,1]$
+
+```cpp
 vector<int> zfunction(const string& s){
   vector<int> z (s.size());
   for (int i = 1, l = 0, r = 0, n = s.size(); i < n; i++){
@@ -897,6 +904,7 @@ vector<int> zfunction(const string& s){
   return z;
 }
 ```
+])
 
 == Manacher's
 
