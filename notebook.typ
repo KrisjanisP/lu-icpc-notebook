@@ -705,7 +705,7 @@ struct Vertex {
     int next[K];
     bool output = false;
 
-    Vertex(int p=-1, char ch='$') {
+    Vertex() {
         fill(begin(next), end(next), -1);
     }
 };
