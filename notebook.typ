@@ -418,6 +418,105 @@ int u = 1;
 for(char c : s) u = add(u, c);
 ```
 
+#block( breakable: false,[
+== Aho-Corasick
+
+```cpp
+const int K = 26; string target; int curr = 0; 
+int ans = 0; int taking = 0;
+
+struct Vertex {
+    int next[K];
+    bool output = false;
+    int p = -1; // parent node
+    char pch; // "transition" character from parent to this node
+    int link = -1; // fail link
+    int go[K]; // if need more memory can delete this and use “next”
+
+    // additional potentially useful things
+    int depth = -1;
+    // longest string that has an output from this vertex
+    int exitlen = -1; 
+
+    Vertex(int p=-1, char ch='$') : p(p), pch(ch) {
+        fill(begin(next), end(next), -1);
+        fill(begin(go), end(go), -1);
+    }
+};
+vector<Vertex> t(1);
+void add_string(string const& s) {
+    int v = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        if (t[v].next[c] == -1) {
+            t[v].next[c] = t.size();
+            t.emplace_back(v, ch); // !!!!! ch not c
+        }
+        v = t[v].next[c];
+    }
+    t[v].output = true;
+}
+int go(int v, char ch);
+int get_link(int v) {
+    if (t[v].link == -1) {
+        if (v == 0 || t[v].p == 0)
+            t[v].link = 0;
+        else
+            t[v].link = go(get_link(t[v].p), t[v].pch);
+    }
+    return t[v].link;
+}
+int go(int v, char ch) {
+    int c = ch - 'a';
+    if (t[v].go[c] == -1) {
+        if (t[v].next[c] != -1)
+            t[v].go[c] = t[v].next[c];
+        else
+            // !!!!! ch not c
+            t[v].go[c] = v == 0 ? 0 : go(get_link(v), ch); 
+    }
+    return t[v].go[c];
+}
+```
+])
+
+#block( breakable: false,[
+```cpp
+
+// int go(int v, char ch) { // go without the go[K] variable
+//     int c = ch - 'a';
+//     if (t[v].next[c] == -1) {
+//         // !!!!! ch not c
+//         t[v].next[c] = v == 0 ? 0 : go(get_link(v), ch); 
+//     }
+//     return t[v].next[c];
+// }
+int get_depth(int v){
+    if (t[v].depth == -1){
+        if (v == 0) {
+            t[v].depth = 0;
+        } else {
+            t[v].depth = get_depth(t[v].p)+1;
+        }
+    }
+    return t[v].depth;
+}
+int get_exitlen(int v){
+    if (t[v].exitlen == -1){
+        if (v == 0){
+            t[v].exitlen = 0;
+        } else if (t[v].output) {
+            t[v].exitlen = get_depth(v);
+        } else {
+            t[v].exitlen = get_exitlen(get_link(v));
+        }
+    }
+    return t[v].exitlen;
+}
+
+```
+])
+
 = Graph algorithms
 == Bellman-Ford
 
@@ -1028,3 +1127,4 @@ for (int i = 0; i < n; ++i) {
   lis = max(lis, j + 1);
 }
 ```
+
