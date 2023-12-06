@@ -8,12 +8,123 @@
 #align(center)[#block(text(weight: 700, 1.75em, "LU ICPC kladīte ;)"))]
 #outline(indent: 2em)
 = Algebra
+#block( breakable: false,[
 == Sum formulas
 $ (a+b)^2=a^2 + 2"ab" + b^2 $
 $ sum_(k=1)^(n) k = frac(n(n + 1),2)  $
 $ sum_(k=1)^(n) k^2 = frac(n(n + 1)(2n + 1),6)  $
 $ sum_(k=1)^(n) k^3 = frac(n^2(n + 1)^2,4)  $
 $ sum_(k=1)^(n) k^4 = frac(n(n+1)(2n + 1)(3n^2 + 3n - 1),30) $
+])
+
+
+#block( breakable: false,[
+
+== Binary exponentiation
+
+```cpp
+ll m_pow(ll base, ll exp, ll mod) {
+    base %= mod;
+    ll result = 1;
+    while (exp > 0) {
+        if (exp & 1) result = ((ll)result * base) % mod;
+        base = ((ll)base * base) % mod;
+        exp >>= 1;
+    }
+    return result;
+}
+```
+])
+
+#block( breakable: false,[
+
+== Extended euclidean & modular division and inversion
+
+```cpp
+int gcdExt(int a, int b, int *x, int *y) {
+    if (a == 0){
+        *x = 0, *y = 1;
+        return b;
+    }  
+    int x1, y1;
+    int gcd = gcdExt(b%a, a, &x1, &y1);
+    *x = y1 - (b/a) * x1;
+    *y = x1;
+    return gcd;
+}
+int modInverse(int b, int m) {
+    int x, y;
+    int g = gcdExt(b, m, &x, &y);
+    if (g != 1) return -1;
+    return (x%m + m) % m;
+}
+// modular division
+int m_divide(ll a, ll b, ll m) {
+    a = a % mod;
+    int inv = modInverse(b, m);
+    if (inv == -1)
+       return -1;
+    else
+       return (inv * a) % m;
+}
+```
+])
+
+
+#block( breakable: false,[
+
+== Factorial and inverse factorial
+
+```cpp
+// requires modInverse and gcdExt for inverse factorial
+// (from Extended euclidean & modular division and inversion)
+// can also ignore if only need factorial
+
+const int MAX_CHOOSE = 3e5;
+vector<int> inverse_fact(MAX_CHOOSE+5);
+vector<int> fact(MAX_CHOOSE+5);
+ 
+void precalc_fact(int n, int m){
+    fact[0] = fact[1] = 1;
+    for (long long i = 2; i <= n; i++){
+        fact[i] = ((ll)fact[i-1]*i) % m;
+    }
+    inverse_fact[0] = inverse_fact[1] = 1;
+    for (long long i = 2; i <= n; i++){
+        inverse_fact[i] = ((ll)modInverse(i, m)*inverse_fact[i-1]) % m;
+    }
+}
+
+// precalc_fact(MAX_CHOOSE);
+```
+])
+
+#block( breakable: false,[
+
+== Linear sieve
+
+```cpp
+const int N = 10000000;
+vector<int> lp(N+1);
+vector<int> pr;
+
+for (int i=2; i <= N; ++i) {
+    if (lp[i] == 0) {
+        lp[i] = i;
+        pr.push_back(i);
+    }
+    for (int j = 0; i * pr[j] <= N; ++j) {
+        lp[i * pr[j]] = pr[j];
+        if (pr[j] == lp[i]) {
+            break;
+        }
+    }
+}
+```
+])
+
+
+#block( breakable: false,[
 
 == FFT
 
@@ -78,7 +189,10 @@ void fft(T* a, int n, int s) {
     }
   }
 }
-
+```
+])
+#block( breakable: false,[
+```cpp
 // assert n is a power of two greater of equal product size
 // n = na + nb; while (n&(n-1)) n++;
 void multiply(T* a, T* b, int n) {
@@ -92,6 +206,8 @@ void multiply(T* a, T* b, int n) {
 // Convert to integers after multiplying:
 // (int)(a[i].x + 0.5);
 ```
+])
+
 = Geometry
 == Basics
 ```cpp
@@ -401,29 +517,222 @@ int query(int a, int b){
   return min(sparse[a][pot], sparse[b - (1 << pot) + 1][pot]);
 }
 ```
+
+#block( breakable: false,[
+
+== Fenwick tree point update
+
+```cpp
+struct FenwickTree {
+    vector<ll> bit;  // binary indexed tree
+    int n;
+ 
+    FenwickTree(int n) {
+        this->n = n;
+        bit.assign(n, 0);
+    }
+ 
+    FenwickTree(vector<ll> const &a) : FenwickTree(a.size()) {
+        for (size_t i = 0; i < a.size(); i++)
+            add(i, a[i]);
+    }
+ 
+    ll sum(int r) {
+        ll ret = 0;
+        for (; r >= 0; r = (r & (r + 1)) - 1)
+            ret += bit[r];
+        return ret;
+    }
+ 
+    ll sum(int l, int r) { // l to r of the original array INCLUSIVE
+        return sum(r) - sum(l - 1);
+    }
+ 
+    void add(int idx, ll delta) {
+        for (; idx < n; idx = idx | (idx + 1))
+            bit[idx] += delta;
+    }
+};
+```
+])
+
+#block( breakable: false,[
+
+== Fenwick tree range update
+
+```cpp
+struct FenwickTree { // range update
+    ll* bit1;
+    ll* bit2;
+    int fsize;
+
+    void FenwickTree(int n){
+        bit1 = new ll[n+1];
+        bit2 = new ll[n+1];
+        fsize = n;
+        for (int i = 1; i <= n; i++){
+            bit1[i] = 0;
+            bit2[i] = 0;
+        }
+    }
+
+    ll getSum(ll BITree[], int index){
+        ll sum = 0; 
+        index++;
+        while (index > 0) {
+            sum += BITree[index];
+            index -= index & (-index);
+        }
+        return sum;
+    }
+    
+    void updateBIT(ll BITree[], int index, ll val){
+        index++;
+        while (index <= fsize) {
+            BITree[index] += val;
+            index += index & (-index);
+        }
+    }
+    
+    ll sum(ll x){
+        return (getSum(bit1, x) * x) - getSum(bit2, x);
+    }
+    
+    void add(int l, int r, ll val){ // add val to range l:r INCLUSIVE
+        updateBIT(bit1, l, val);
+        updateBIT(bit1, r + 1, -val);
+        updateBIT(bit2, l, val * (l - 1));
+        updateBIT(bit2, r + 1, -val * r);
+    }
+    
+    ll calc(int l, int r){ // sum on range l:r INCLUSIVE
+        return sum(r) - sum(l - 1);
+    }
+};
+```
+])
+
+#block( breakable: false,[
+
+== Segment tree
+
+```cpp
+struct item {
+    long long sum;
+};
+struct segtree {
+    int size;
+    vector<item> values;
+    item merge(item a, item b){
+        return {
+            a.sum + b.sum
+        };
+    }
+    item NEUTURAL_ELEMENT = {0};
+    item single(int v){
+        return {v};
+    }
+ 
+    void init(int n){
+        size = 1;
+        while (size < n){
+            size *= 2;
+        }
+        values.resize(size*2, NEUTURAL_ELEMENT);
+    }
+
+    void build(vi &arr, int x, int lx, int rx){
+        if (rx - lx == 1){
+            if (lx < arr.size()){
+                values[x] = single(arr[lx]);
+            } else {
+                values[x] = NEUTURAL_ELEMENT;
+            }
+            return;
+        }
+        int m = (lx+rx)/2;
+        build(arr, 2 * x + 1, lx, m);
+        build(arr, 2 * x + 2, m, rx);
+        values[x] = merge(values[2*x+1], values[2*x+2]);
+    }
+    void build(vi &arr){
+        build(arr, 0, 0, size);
+    }
+ 
+    void set(int i, int v, int x, int lx, int rx){
+        if (rx - lx == 1){
+            values[x] = single(v);
+            return;
+        }
+        int m = (lx + rx) / 2;
+        if (i < m){
+            set(i, v, 2*x+1, lx, m);
+        } else {
+            set(i, v, 2*x+2, m, rx);
+        }
+        values[x] = merge(values[2*x+1], values[2*x+2]);
+    }
+    void set(int i, int v){
+        set(i, v, 0, 0, size);
+    }
+ ```
+])
+#block( breakable: false,[
+ ```cpp
+    item calc(int l, int r, int x, int lx, int rx){
+        if (lx >= r || rx <= l) return NEUTURAL_ELEMENT;
+        if (lx >= l && rx <= r) return values[x];
+        int m = (lx+rx)/2;
+        item values1 = calc(l, r, 2*x+1, lx, m);
+        item values2 = calc(l, r, 2*x+2, m, rx);
+        return merge(values1, values2);
+    }
+    item calc(int l, int r){
+        return calc(l, r, 0, 0, size);
+    }
+};
+```
+])
+
+#block( breakable: false,[
+
 == Trie
 
 ```cpp
-// Trie <O(|S|), O(|S|)>
-int trie[N][26], trien = 1;
+const int K = 26;
 
-int add(int u, char c){
-  c-='a';
-  if (trie[u][c]) return trie[u][c];
-  return trie[u][c] = ++trien;
+struct Vertex {
+    int next[K];
+    bool output = false;
+
+    Vertex(int p=-1, char ch='$') {
+        fill(begin(next), end(next), -1);
+    }
+};
+
+vector<Vertex> t(1); // trie nodes
+
+void add_string(string const& s) {
+    int v = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        if (t[v].next[c] == -1) {
+            t[v].next[c] = t.size();
+            t.emplace_back(); 
+        }
+        v = t[v].next[c];
+    }
+    t[v].output = true;
 }
-
-//to add a string s in the trie
-int u = 1;
-for(char c : s) u = add(u, c);
 ```
+])
 
 #block( breakable: false,[
+
 == Aho-Corasick
 
 ```cpp
-const int K = 26; string target; int curr = 0; 
-int ans = 0; int taking = 0;
+const int K = 26; 
 
 struct Vertex {
     int next[K];
@@ -491,6 +800,8 @@ int go(int v, char ch) {
 //     }
 //     return t[v].next[c];
 // }
+
+// helper function
 int get_depth(int v){
     if (t[v].depth == -1){
         if (v == 0) {
@@ -501,6 +812,7 @@ int get_depth(int v){
     }
     return t[v].depth;
 }
+// helper function
 int get_exitlen(int v){
     if (t[v].exitlen == -1){
         if (v == 0){
@@ -513,7 +825,137 @@ int get_exitlen(int v){
     }
     return t[v].exitlen;
 }
+```
+])
 
+#block( breakable: false,[
+== Disjoint set union
+
+```cpp
+struct disjSet {
+    int *rank, *parent, n;
+    disjSet(int n) {
+        rank = new int[n];
+        parent = new int[n];
+        this->n = n;
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    int find(int a) {
+        if (parent[a] != a){
+            //return find(parent[a]); // no path compression
+            parent[a] = find(parent[a]); // path compression
+        }
+        return parent[a];
+    }
+    void Union(int a, int b) {
+        int a_set = find(a);
+        int b_set = find(b);
+        if (a_set == b_set) return;
+        if (rank[a_set] < rank[b_set]) {
+            update_union(a_set, b_set);
+        } else if (rank[a_set] > rank[b_set]) {
+            update_union(b_set, a_set);
+        } else {
+            update_union(b_set, a_set);
+            rank[a_set] = rank[a_set] + 1;
+        }
+    }
+    // change merge behaviour here
+    void update_union(int a, int b){ // merge a into b
+        parent[a] = b;
+    }
+};
+```
+])
+
+#block( breakable: false,[
+
+== Merge sort tree
+
+```cpp
+struct MergeSortTree {
+
+    int size;
+    vector<vector<ll>> values;
+
+    void init(int n){
+        size = 1;
+        while (size < n){
+            size *= 2;
+        }
+        values.resize(size*2, vl(0));
+    }
+
+    void build(vl &arr, int x, int lx, int rx){
+        if (rx - lx == 1){
+            if (lx < arr.size()){
+                values[x].pb(arr[lx]);
+            } else {
+                values[x].pb(-1);
+            }
+            return;
+        }
+        int m = (lx+rx)/2;
+        build(arr, 2 * x + 1, lx, m);
+        build(arr, 2 * x + 2, m, rx);
+        
+        int i = 0;
+        int j = 0;
+        int asize = values[2*x+1].size();
+        while (i < asize && j < asize){
+            if (values[2*x+1][i] < values[2*x+2][j]){
+                values[x].pb(values[2*x+1][i]);
+                i++;
+            } else {
+                values[x].pb(values[2*x+2][j]);
+                j++;
+            }
+        }
+        while (i < asize) {
+            values[x].pb(values[2*x+1][i]);
+            i++;
+        }
+        while (j < asize){
+            values[x].pb(values[2*x+2][j]);
+            j++;
+        }
+    }
+    void build(vl &arr){
+        build(arr, 0, 0, size);
+    }
+```
+])
+#block( breakable: false,[
+```cpp
+    int calc(int l, int r, int x, int lx, int rx, int k){
+        if (lx >= r || rx <= l) return 0;
+        
+        // (elements strictly less than k currently)
+        if (lx >= l && rx <= r) { // CHANGE HEURISTIC HERE 
+            int lft = -1;
+            int rght = values[x].size();
+            while (rght - lft > 1){
+                int mid = (lft+rght)/2;
+                if (values[x][mid] < k){
+                    lft = mid;
+                } else {
+                    rght = mid;
+                }
+            }
+            return lft+1;
+        }
+
+        int m = (lx+rx)/2;
+        int values1 = calc(l, r, 2*x+1, lx, m, k);
+        int values2 = calc(l, r, 2*x+2, m, rx, k);
+        return values1 + values2;
+    }
+    int calc(int l, int r, int k){
+        return calc(l, r, 0, 0, size, k);
+    }
+};
 ```
 ])
 
@@ -1108,6 +1550,7 @@ ld intersect_y(line s, line t) { return s.b + s.m * intersect_x(s, t); }
 */
 ```
 
+#block( breakable: false,[
 == Longest Increasing Subsequence
 
 ```cpp
@@ -1127,4 +1570,28 @@ for (int i = 0; i < n; ++i) {
   lis = max(lis, j + 1);
 }
 ```
+])
 
+#block( breakable: false,[
+== SOS DP (Sum over Subsets)
+```cpp
+// O(bits*(2^bits)) 
+
+const int bits = 20;
+
+vector<int> a(1<<bits); // initial value of each subset
+vector<int> f(1<<bits); // sum over all subsets 
+// (at f[011] = a[011]+a[001]+a[010]+a[000])
+
+for (int i = 0; i<(1<<bits); i++){ 
+    f[i] = a[i];
+}
+for (int i = 0; i < bits; i++) {
+  for(int mask = 0; mask < (1<<bits); mask++){
+    if(mask & (1<<i)){
+        f[mask] += f[mask^(1<<i)];
+    }
+  }
+}
+```
+])

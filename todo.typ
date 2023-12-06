@@ -1,16 +1,16 @@
 == Algebra
 
-- [ ] Binary Exponention
-- [ ] Extended Euclidean
+- [X] Binary Exponention
+- [X] Extended Euclidean
 - [ ] Linear Diophantine
-- [ ] Linear Sieve
+- [X] Linear Sieve
 - [ ] Miller Rabin (deterministic)
 - [ ] Pollard Rho
 - [ ] Euler's Totient
-- [ ] Modular Inverse
+- [X] Modular Inverse
 - [ ] Chinese Remainder Theorem
 - [ ] Garner's Algorithm
-- [ ] Factorial modulo p
+- [X] Factorial modulo p
 - [ ] Discrete Logarithm
 - [ ] Primitive Root
 - [ ] Discrete Root
@@ -20,25 +20,30 @@
 - [ ] Bit manipulation
 - [ ] Enumerating bitmask subsets
 - [ ] Arbitrary Precision
-- [ ] Fast Fourier Transform
+- [X] Fast Fourier Transform
 - [ ] Continued Fractions
 
 == Data Structures
 
-- [ ] Sparse Table
-- [ ] Disjoint Set Union
-- [ ] Fenwick Tree
+- [X] Sparse Table
+- [X] Disjoint Set Union
+- [X] Fenwick Tree
+- [X] Fenwick Tree Range Update
 - [ ] Sqrt decomposition
-- [ ] Segment Tree
-- [ ] Treap
+- [X] Segment Tree
+- [X] Treap
+- [X] Merge Sort Tree
 - [ ] Sqrt tree
 - [ ] Randomized Heap
-- [ ] Aho-Corasick
+- [X] Trie
+- [X] Aho-Corasick
 
 == Dynamic Programming
 
 - [ ] Divide & Conquer DP
 - [ ] Knuth's Optimization
-- [ ] Convex Hull Trick
+- [X] Longest Increasing Subsequence
+- [X] Convex Hull Trick
+- [X] SOS DP (Sum over Subsets)
 
 == String Processing
