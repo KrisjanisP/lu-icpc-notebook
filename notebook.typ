@@ -10,9 +10,44 @@
 
 #colbreak()
 
-= Algebra
+= C++ programming language
 
-#v(1em)
+== Input/Output disable sync
+
+```cpp
+ios_base::sync_with_stdio(false);
+cin.tie(NULL); cout.tie(NULL);
+```
+
+== Optimization pragmas
+
+```cpp
+// change to O3 to disable fast-math for geometry problems
+#pragma GCC optimize("Ofast,unroll-loops")
+#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt,tune=native")
+```
+
+== Printing structs
+
+```cpp
+ostream& operator<<(ostream& os, const pair<int, int>& p) {
+    return os << "(" << p.first << ", " << p.second << ")";
+}
+```
+
+== Lambda func for sorting
+
+```cpp
+using ii = pair<int,int>;
+vector<ii> fracs = {{1, 2}, {3, 4}, {1, 3}};
+// sort positive rational numbers
+sort(fracs.begin(), fracs.end(),
+    [](const ii& a, const ii& b) {
+    return a.fi*b.se < b.fi*a.se;
+});
+```
+
+= Algebra
 
 #block( breakable: false,[
 
@@ -194,100 +229,6 @@ ostream &operator<<(ostream &os, const point &p) {
     return os;
 }
 
-```
-
-== Closest pair
-
-```cpp
-#include "basics.cpp"
-//DIVIDE AND CONQUER METHOD
-//Warning: include variable id into the struct point
-
-struct cmp_y {
-    bool operator()(const point & a, const point & b) const {
-        return a.y < b.y;
-    }
-};
-
-ld min_dist = LINF;
-pair<int, int> best_pair;
-vector<point> pts, stripe;
-int n;
-
-void upd_ans(const point & a, const point & b) {
-    ld dist = sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
-    if (dist < min_dist) {
-        min_dist = dist;
-        // best_pair = {a.id, b.id};
-    }
-}
-
-void closest_pair(int l, int r) {
-    if (r - l <= 3) {
-        for (int i = l; i < r; ++i) {
-            for (int j = i + 1; j < r; ++j) {
-                upd_ans(pts[i], pts[j]);
-            }
-        }
-        sort(pts.begin() + l, pts.begin() + r, cmp_y());
-        return;
-    }
-
-    int m = (l + r) >> 1;
-    type midx = pts[m].x;
-    closest_pair(l, m);
-    closest_pair(m, r);
-
-    merge(pts.begin() + l, pts.begin() + m, pts.begin() + m, pts.begin() + r, stripe.begin(), cmp_y());
-    copy(stripe.begin(), stripe.begin() + r - l, pts.begin() + l);
-
-    int stripe_sz = 0;
-    for (int i = l; i < r; ++i) {
-        if (abs(pts[i].x - midx) < min_dist) {
-            for (int j = stripe_sz - 1; j >= 0 && pts[i].y - stripe[j].y < min_dist; --j)
-                upd_ans(pts[i], stripe[j]);
-            stripe[stripe_sz++] = pts[i];
-        }
-    }
-}
-
-int main(){
-    //read and save in vector pts
-    min_dist = LINF;
-    stripe.resize(n);
-    sort(pts.begin(), pts.end());
-    closest_pair(0, n);
-}
-
-
-//LINE SWEEP
-int n; //amount of points
-point pnt[N];
-
-struct cmp_y {
-    bool operator()(const point & a, const point & b) const {
-        if(a.y == b.y) return a.x < b.x;
-        return a.y < b.y;
-    }
-};
-
-ld closest_pair() {
-  sort(pnt, pnt+n);
-  ld best = numeric_limits<double>::infinity();
-  set<point, cmp_y> box;
-
-  box.insert(pnt[0]);
-  int l = 0;
-
-  for (int i = 1; i < n; i++){
-    while(l < i and pnt[i].x - pnt[l].x > best)
-      box.erase(pnt[l++]);
-    for(auto it = box.lower_bound({0, pnt[i].y - best}); it != box.end() and pnt[i].y + best >= it->y; it++)
-      best = min(best, hypot(pnt[i].x - it->x, pnt[i].y - it->y));
-    box.insert(pnt[i]);
-  }
-  return best;
-}
 ```
 
 = Data structures

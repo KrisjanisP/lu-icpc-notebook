@@ -1,3 +1,10 @@
+== C++ syntax
+
+- [X] Input/Output sync
+- [X] Optimization pragmas
+- [X] Printing structs
+- [X] Lambda func for sorting
+
 == Algebra
 
 - [X] Binary Exponention
