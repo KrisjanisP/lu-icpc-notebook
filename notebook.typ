@@ -698,16 +698,6 @@ void solve()
 
 == Dijkstra
 ```cpp
-/**********************************************************************************
-* DIJKSTRA'S ALGORITHM (SHORTEST PATH TO A VERTEX)                                *
-* Time complexity: O((V+E)logE)                                                   *
-* Usage: dist[node]                                                               *
-* Notation: m:           number of edges                                          *
-*           (a, b, w):   edge between a and b with weight w                       *
-*           s:           starting node                                            *
-*           par[v]:      parent node of u, used to rebuild the shortest path      *
-**********************************************************************************/
-
 vector<int> adj[N], adjw[N];
 int dist[N];
 
@@ -776,95 +766,72 @@ Usage:
 - add_edge(from, to, capacity)   
 - recover() (optional) 
 
+#block(breakable: false, [
 ```cpp
-using ll = long long;
-using ii = pair<ll,ll>;
+const ll N=1e5+5, INF=1e9;
+struct edge{ll v, c, f;};
 
-namespace dinic {
-    const ll N=1e5+5, INF=1e9;
-    struct edge{ll v, c, f;};
+ll src=0, snk=N-1, h[N], ptr[N];
+vector<edge> edgs;
 
-    ll src, snk, h[N], ptr[N];
-    vector<edge> edgs;
+vector<ll> g[N];
 
-    vector<ll> g[N];
-
-    void add_edge(ll u, ll v, ll c) {
-        ll k=edgs.size();
-        edgs.push_back({v,c,0});
-        edgs.push_back({u,0,0});
-        g[u].push_back(k);
-        g[v].push_back(k+1);
-    }
-
-    void clear() {
-        memset(h, 0, sizeof(h));
-        memset(ptr,0,sizeof(ptr));
-        edgs.clear();
-        for(ll i=0;i<N;i++) g[i].clear();
-        src=0;
-        snk=N-1;
-    }
-
-    bool bfs() {
-        memset(h, 0, sizeof(h));
-        queue<ll> q;
-        h[src]=1;
-        q.push(src);
-        while(!q.empty()){
-            ll u=q.front();q.pop();
-            for(ll i:g[u]){
-                ll v=edgs[i].v;
-                if(!h[v]&&edgs[i].f<edgs[i].c)
-                    q.push(v),h[v]=h[u]+1;
-            }
-        }
-        return h[snk];
-    }
-
-    ll dfs(ll u, ll flow){
-        if(!flow or u==snk) return flow;
-        for(ll &i=ptr[u];i<g[u].size();i++){
-            edge &dir=edgs[g[u][i]],&rev=edgs[g[u][i]^1];
-            ll v=dir.v;
-            if(h[v]!=h[u]+1) continue;
-            ll inc=min(flow,dir.c-dir.f);
-            inc=dfs(v,inc);
-            if(inc){
-                dir.f+=inc,rev.f-=inc;
-                return inc;
-            }
-        }
-        return 0;
-    }
-
-    ll dinic(){
-        ll flow=0;
-        while(bfs()){
-            memset(ptr,0,sizeof(ptr));
-            while(ll inc=dfs(src,INF))
-                flow += inc;
-        }
-        return flow;
-    }
-
-    vector<pair<ii,ll>> recover() {
-        vector<pair<ii,ll>> res;
-        for(ll i=0;i<edgs.size();i+=2){
-            if(edgs[i].f>0){
-                ll v=edgs[i].v;
-                ll u=edgs[i^1].v;
-                res.push_back({{u,v},edgs[i].f});
-            }
-        }
-        return res;
-    }
+void add_edge(ll u, ll v, ll c) {
+    edgs.push_back({v,c,0}), edgs.push_back({u,0,0});
+    ll k=edgs.size();
+    g[u].push_back(k), g[v].push_back(k+1);
 }
 
-int main() {
-    dinic::clear();
+bool bfs() {
+    memset(h, 0, sizeof(h));
+    queue<ll> q;
+    h[src]=1;
+    q.push(src);
+    while(!q.empty()){
+        ll u=q.front();q.pop();
+        for(ll i:g[u]){
+            ll v=edgs[i].v;
+            if(!h[v]&&edgs[i].f<edgs[i].c)
+                q.push(v),h[v]=h[u]+1;
+        }
+    }
+    return h[snk];
+}
+
+ll dfs(ll u, ll flow){
+    if(!flow or u==snk) return flow;
+    for(ll &i=ptr[u];i<g[u].size();i++){
+        edge &dir=edgs[g[u][i]],&rev=edgs[g[u][i]^1];
+        if(h[dir.v]!=h[u]+1) continue;
+        ll inc=min(flow,dir.c-dir.f);
+        inc=dfs(dir.v,inc);
+        if(inc){ dir.f+=inc,rev.f-=inc; return inc;}
+    }
+    return 0;
+}
+
+ll dinic(){
+    ll flow=0;
+    while(bfs()){
+        memset(ptr,0,sizeof(ptr));
+        while(ll inc=dfs(src,INF)) flow += inc;
+    }
+    return flow;
+}
+
+vector<pair<ii,ll>> recover() {
+    vector<pair<ii,ll>> res;
+    for(ll i=0;i<edgs.size();i+=2){
+        if(edgs[i].f>0){
+            ll v=edgs[i].v, u=edgs[i^1].v;
+            res.push_back({{u,v},edgs[i].f});
+        }
+    }
+    return res;
 }
 ```
+])
+
 == Flow with demands
 
 Finding an arbitrary flow
@@ -884,30 +851,10 @@ Finding Min Flow
 - The cost of this edge represents all the flow from old network
 - Min flow = $S(L)$ that arrives in Old Sink + flow that leaves (Old Sink -> Old Source)
 
+#block( breakable: false,[
 == Kosaraju's algorithm
 
 ```cpp
-/**********************************************************************************
-* KOSARAJU'S ALGORITHM (GET EVERY STRONGLY CONNECTED COMPONENTS (SCC))            *
-* Description: Given a directed graph, the algorithm generates a list of every    *
-* strongly connected components. A SCC is a set of points in which you can reach  *
-* every point regardless of where you start from. For instance, cycles can be     *
-* a SCC themselves or part of a greater SCC.                                      *
-* This algorithm starts with a DFS and generates an array called "ord" which      *
-* stores vertices according to the finish times (i.e. when it reaches "return").  *
-* Then, it makes a reversed DFS according to "ord" list. The set of points        *
-* visited by the reversed DFS defines a new SCC.                                  *
-* One of the uses of getting all SCC is that you can generate a new DAG (Directed *
-* Acyclic Graph), easier to work with, in which each SCC being a "supernode" of   *
-* the DAG.                                                                        *
-* Time complexity: O(V+E)                                                         *
-* Notation: adj[i]:   adjacency list for node i                                   *
-*           adjt[i]:  reversed adjacency list for node i                          *
-*           ord:      array of vertices according to their finish time            *
-*           ordn:     ord counter                                                 *
-*           scc[i]:   supernode assigned to i                                     *
-*           scc_cnt:  amount of supernodes in the graph                           *
-**********************************************************************************/
 const int N = 2e5 + 5;
 
 vector<int> adj[N], adjt[N];
@@ -931,40 +878,18 @@ void add_edge(int u, int v){
   adjt[v].push_back(u);
 }
 
-//Undirected version:
-/*
-  int par[N];
-
-  void dfs(int u) {
-    vis[u] = 1;
-    for (auto v : adj[u]) if(!vis[v]) par[v] = u, dfs(v);
-    ord[ordn++] = u;
-  }
-
-  void dfst(int u) {
-    scc[u] = scc_cnt, vis[u] = 0;
-    for (auto v : adj[u]) if(vis[v] and u != par[v]) dfst(v);
-  }
-
-  // add edge: u -> v
-  void add_edge(int u, int v){
-    adj[u].push_back(v);
-    adj[v].push_back(u);
-  }
-
-*/
-
 // run kosaraju
 void kosaraju(){
   for (int i = 1; i <= n; ++i) if (!vis[i]) dfs(i);
   for (int i = ordn - 1; i >= 0; --i) if (vis[ord[i]]) scc_cnt++, dfst(ord[i]);
 }
 ```
+])
 
-== Lowest common ancestor  (LCA)
+#block( breakable: false,[
+== Lowest Common Ancestor
 
 ```cpp
-// Lowest Common Ancestor <O(nlogn), O(logn)>
 const int N = 1e6, M = 25;
 int anc[M][N], h[N], rt;
 
@@ -989,6 +914,7 @@ int lca(int u, int v) {
   return anc[0][u];
 }
 ```
+])
 
 = String Processing
 == Knuth-Morris-Pratt (KMP)
@@ -1017,10 +943,10 @@ void kmp() {
 }
 ```
 
+#block( breakable: false,[
 == Suffix Array
 
 ```cpp
-// Suffix Array O(nlogn)
 // s.push('$');
 vector<int> suffix_array(string &s){
   int n = s.size(), alph = 256;
@@ -1054,8 +980,12 @@ vector<int> suffix_array(string &s){
   }
   return p;
 }
+```
+])
 
-// Longest Common Prefix with SA O(n)
+#block( breakable: false,[
+== Longest common prefix with SA
+```cpp
 vector<int> lcp(string &s, vector<int> &p){
   int n = s.size();
   vector<int> ans(n - 1), pi(n);
@@ -1072,23 +1002,10 @@ vector<int> lcp(string &s, vector<int> &p){
 
   return ans;
 }
-
-// Longest Repeated Substring O(n)
-int lrs = 0;
-for (int i = 0; i < n; ++i) lrs = max(lrs, lcp[i]);
-
-// Longest Common Substring O(n)
-// m = strlen(s);
-// strcat(s, "$"); strcat(s, p); strcat(s, "#");
-// n = strlen(s);
-int lcs = 0;
-for (int i = 1; i < n; ++i) if ((sa[i] < m) != (sa[i-1] < m))
-  lcs = max(lcs, lcp[i]);
-
-// To calc LCS for multiple texts use a slide window with minqueue
-// The numver of different substrings of a string is n*(n + 1)/2 - sum(lcs[i])
 ```
+])
 
+#block( breakable: false,[
 == Rabin-Karp
 
 ```cpp
@@ -1114,6 +1031,7 @@ void rabin() {
   }
 }
 ```
+])
 
 #block( breakable: false,[
   
@@ -1139,6 +1057,7 @@ vector<int> zfunction(const string& s){
 ```
 ])
 
+#block( breakable: false,[
 == Manacher's
 
 ```cpp
@@ -1166,6 +1085,7 @@ int manacher() {
   return m;
 }
 ```
+])
 
 = Dynamic programming
 == Convex hull trick
@@ -1246,13 +1166,6 @@ ld intersect_y(line s, line t) { return s.b + s.m * intersect_x(s, t); }
 == Longest Increasing Subsequence
 
 ```cpp
-// Longest Increasing Subsequence - O(nlogn)
-//
-// dp(i) = max j<i { dp(j) | a[j] < a[i] } + 1
-//
-
-// int dp[N], v[N], n, lis;
-
 memset(dp, 63, sizeof dp);
 for (int i = 0; i < n; ++i) {
   // increasing: lower_bound
