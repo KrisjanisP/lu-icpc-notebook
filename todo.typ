@@ -57,9 +57,9 @@
 == String Processing
 
 - [X] Z-function
-- [ ] Suffix array
-- [ ] KMP prefix function
-- [ ] Rabin-Karp
+- [X] Suffix array
+- [X] KMP prefix function
+- [X] Rabin-Karp
 
 == Graph algorithms
 
@@ -67,16 +67,17 @@
 
 == Geometry
 
-- [ ] Dot product
-- [ ] Cross product
-- [ ] Line-Point distance
-- [ ] Shoelace formula
-- [ ] From segment to line
-- [ ] Line-Line intersection
-- [ ] Segment intersection
+- [X] Dot product
+- [X] Cross product
+- [X] Line-Point distance
+- [X] Shoelace formula
+- [X] From segment to line
+- [X] Three point orientation
+- [X] Line-Line intersection
+- [X] Segment intersection
 - [ ] 3 points circle
 - [ ] Reflection & Rotation
-- [ ] Convex Hull
+- [X] Convex Hull
 - [ ] Point in Polygon test
 - [ ] Pick's Theorem
 - [ ] Closest pair of points
