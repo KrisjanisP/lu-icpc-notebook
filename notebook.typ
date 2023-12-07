@@ -5,6 +5,15 @@
 #set heading(numbering: "1.")
 #show: columns.with(3, gutter: 2em)
 
+#show heading.where(
+  level: 1
+): it => block(width: 100%)[
+  #set align(center)
+  #set text(12pt, weight: "regular")
+  #it.body
+  #v(1em)
+]
+
 #align(center)[#block(text(weight: 700, 1.75em, "LU ICPC kladīte ;)"))]
 #outline(indent: 2em)
 
@@ -155,6 +164,30 @@ for (int i=2; i <= N; ++i) {
 ```
 ])
 
+#block(breakable: false,[
+
+== Matrix multiplication
+```cpp
+struct Matrix:vector<vector<int>>
+{
+    // "inherit" vector's constructor
+    using vector::vector;
+    
+    Matrix operator *(Matrix other)
+    {
+        int rows = size();
+        int cols = other[0].size();
+        Matrix res(rows, vector<int>(cols));
+        for(int i=0;i<rows;i++)
+            for(int j=0;j<other.size();j++)
+                for(int k=0;k<cols;k++)
+                    res[i][k]+=at(i).at(j)*other[j][k];
+        return res;
+    }
+};
+```
+])
+
 
 #block( breakable: false,[
 
@@ -221,26 +254,20 @@ int main() {
 
 = Geometry
 
-== Miscellanea
 
-```cpp
-ostream &operator<<(ostream &os, const point &p) {
-    os << "(" << p.x << "," << p.y << ")"; 
-    return os;
-}
 
-```
+#colbreak()
 
 = Data structures
+
+#block(breakable:false,[
 == Treap
 
 ```cpp
 // Implicit segment tree implementation
 
 struct Node{
-    int value;
-    int cnt;
-    int priority;
+    int value, cnt, priority;
     Node *left, *right;
     Node(int p) : value(p), cnt(1), priority(gen()), left(NULL), right(NULL) {};
 };
@@ -258,14 +285,8 @@ void update_cnt(pnode &q){
 }
  
 void merge(pnode &T, pnode lef, pnode rig){
-    if(!lef) {
-        T=rig;
-        return;
-    }
-    if(!rig){
-        T=lef;
-        return;
-    }
+    if(!lef) {T=rig;return;}
+    if(!rig){T=lef;return;}
     if(lef->priority > rig->priority){
         merge(lef->right, lef->right, rig);
         T = lef;
@@ -294,6 +315,52 @@ void split(pnode cur, pnode &lef, pnode &rig, int key){
     update_cnt(cur);
 }
 ```
+])
+
+#block(breakable:false,[
+== Lazy segment tree
+
+```cpp
+struct SumSegmentTree{
+    vector<ll> S, O, L;
+    void build(ll ti, ll tl, ll tr){
+        if(tl==tr){S[ti]=O[tl]; return;}
+        build(ti*2, tl, (tl+tr)/2);
+        build((ti*2)+1, ((tl+tr)/2)+1, tr);
+        S[ti]=S[ti*2]+S[(ti*2)+1];
+    }
+    void push(ll ti, ll tl, ll tr){
+        S[ti] += L[ti]*(tr-tl+1);
+        if(tl==tr){L[ti]=0;return;}
+        L[ti+ti] += L[ti],L[ti+ti+1] += L[ti];
+        L[ti] = 0;
+    }
+    ll query(ll ti, ll tl, ll tr, ll i, ll j){
+        push(ti, tl, tr);
+        if(i<=tl&&tr<=j) return S[ti];
+        if(tr<i||tl>j) return 0;
+        ll a = query(ti*2, tl, (tl+tr)/2, i, j);
+        ll b = query((ti*2)+1, ((tl+tr)/2)+1,tr, i, j);
+        return a+b;
+    }
+    void update(ll ti, ll tl, ll tr, ll i, ll j, ll v){
+        if(i<=tl&&tr<=j){L[ti]+=v;return;}
+        if(tr<i||tl>j) return;
+        S[ti]+=v*(i-j+1);
+        update(ti*2, tl, (tl+tr)/2, i, j, v);
+        update((ti*2)+1, ((tl+tr)/2)+1, tr, i, j, v);
+    };
+    ST(vector<ll> &V){
+        O = V;
+        S.resize(O.size()*4, 0);
+        L.resize(O.size()*4, 0);
+        build(1, 0, O.size()-1);
+    }
+};
+```
+])
+
+#block(breakable:false,[
 == Sparse table
 
 ```cpp
@@ -318,10 +385,10 @@ int query(int a, int b){
   return min(sparse[a][pot], sparse[b - (1 << pot) + 1][pot]);
 }
 ```
+])
 
 #block( breakable: false,[
-
-== Fenwick tree point update
+== Fenwick tree
 
 ```cpp
 struct FenwickTree {
@@ -333,11 +400,6 @@ struct FenwickTree {
         bit.assign(n, 0);
     }
  
-    FenwickTree(vector<ll> const &a) : FenwickTree(a.size()) {
-        for (size_t i = 0; i < a.size(); i++)
-            add(i, a[i]);
-    }
- 
     ll sum(int r) {
         ll ret = 0;
         for (; r >= 0; r = (r & (r + 1)) - 1)
@@ -345,7 +407,7 @@ struct FenwickTree {
         return ret;
     }
  
-    ll sum(int l, int r) { // l to r of the original array INCLUSIVE
+    ll sum(int l, int r) { // l to r of the og array INCLUSIVE
         return sum(r) - sum(l - 1);
     }
  
@@ -357,143 +419,6 @@ struct FenwickTree {
 ```
 ])
 
-#block( breakable: false,[
-
-== Fenwick tree range update
-
-```cpp
-struct FenwickTree { // range update
-    ll* bit1;
-    ll* bit2;
-    int fsize;
-
-    void FenwickTree(int n){
-        bit1 = new ll[n+1];
-        bit2 = new ll[n+1];
-        fsize = n;
-        for (int i = 1; i <= n; i++){
-            bit1[i] = 0;
-            bit2[i] = 0;
-        }
-    }
-
-    ll getSum(ll BITree[], int index){
-        ll sum = 0; 
-        index++;
-        while (index > 0) {
-            sum += BITree[index];
-            index -= index & (-index);
-        }
-        return sum;
-    }
-    
-    void updateBIT(ll BITree[], int index, ll val){
-        index++;
-        while (index <= fsize) {
-            BITree[index] += val;
-            index += index & (-index);
-        }
-    }
-    
-    ll sum(ll x){
-        return (getSum(bit1, x) * x) - getSum(bit2, x);
-    }
-    
-    void add(int l, int r, ll val){ // add val to range l:r INCLUSIVE
-        updateBIT(bit1, l, val);
-        updateBIT(bit1, r + 1, -val);
-        updateBIT(bit2, l, val * (l - 1));
-        updateBIT(bit2, r + 1, -val * r);
-    }
-    
-    ll calc(int l, int r){ // sum on range l:r INCLUSIVE
-        return sum(r) - sum(l - 1);
-    }
-};
-```
-])
-
-#block( breakable: false,[
-
-== Segment tree
-
-```cpp
-struct item {
-    long long sum;
-};
-struct segtree {
-    int size;
-    vector<item> values;
-    item merge(item a, item b){
-        return {
-            a.sum + b.sum
-        };
-    }
-    item NEUTURAL_ELEMENT = {0};
-    item single(int v){
-        return {v};
-    }
- 
-    void init(int n){
-        size = 1;
-        while (size < n){
-            size *= 2;
-        }
-        values.resize(size*2, NEUTURAL_ELEMENT);
-    }
-
-    void build(vi &arr, int x, int lx, int rx){
-        if (rx - lx == 1){
-            if (lx < arr.size()){
-                values[x] = single(arr[lx]);
-            } else {
-                values[x] = NEUTURAL_ELEMENT;
-            }
-            return;
-        }
-        int m = (lx+rx)/2;
-        build(arr, 2 * x + 1, lx, m);
-        build(arr, 2 * x + 2, m, rx);
-        values[x] = merge(values[2*x+1], values[2*x+2]);
-    }
-    void build(vi &arr){
-        build(arr, 0, 0, size);
-    }
- 
-    void set(int i, int v, int x, int lx, int rx){
-        if (rx - lx == 1){
-            values[x] = single(v);
-            return;
-        }
-        int m = (lx + rx) / 2;
-        if (i < m){
-            set(i, v, 2*x+1, lx, m);
-        } else {
-            set(i, v, 2*x+2, m, rx);
-        }
-        values[x] = merge(values[2*x+1], values[2*x+2]);
-    }
-    void set(int i, int v){
-        set(i, v, 0, 0, size);
-    }
- ```
-])
-#block( breakable: false,[
- ```cpp
-    item calc(int l, int r, int x, int lx, int rx){
-        if (lx >= r || rx <= l) return NEUTURAL_ELEMENT;
-        if (lx >= l && rx <= r) return values[x];
-        int m = (lx+rx)/2;
-        item values1 = calc(l, r, 2*x+1, lx, m);
-        item values2 = calc(l, r, 2*x+2, m, rx);
-        return merge(values1, values2);
-    }
-    item calc(int l, int r){
-        return calc(l, r, 0, 0, size);
-    }
-};
-```
-])
 
 #block( breakable: false,[
 
@@ -505,10 +430,7 @@ const int K = 26;
 struct Vertex {
     int next[K];
     bool output = false;
-
-    Vertex() {
-        fill(begin(next), end(next), -1);
-    }
+    Vertex() {fill(begin(next), end(next), -1);}
 };
 
 vector<Vertex> t(1); // trie nodes
@@ -630,42 +552,31 @@ int get_exitlen(int v){
 ])
 
 #block( breakable: false,[
-== Disjoint set union
+== Disjoint Set Union
 
 ```cpp
-struct disjSet {
-    int *rank, *parent, n;
-    disjSet(int n) {
-        rank = new int[n];
-        parent = new int[n];
-        this->n = n;
-        for (int i = 0; i < n; i++) {
+struct DSU {
+    vector<int> parent, rank;
+    DSU(int n) {
+        parent.resize(n); rank.resize(n);
+        for (int i = 0; i < n; i++)
             parent[i] = i;
-        }
     }
-    int find(int a) {
-        if (parent[a] != a){
-            //return find(parent[a]); // no path compression
-            parent[a] = find(parent[a]); // path compression
-        }
-        return parent[a];
+    int root(int a) {
+        if (parent[a] == a) return a;
+        return parent[a] = find(parent[a]);
     }
-    void Union(int a, int b) {
-        int a_set = find(a);
-        int b_set = find(b);
-        if (a_set == b_set) return;
-        if (rank[a_set] < rank[b_set]) {
-            update_union(a_set, b_set);
-        } else if (rank[a_set] > rank[b_set]) {
-            update_union(b_set, a_set);
+    void unite(int a, int b) {
+        a = find(a), b = find(b);
+        if (a == b) return;
+        if (rank[a] < rank[b]) {
+            parent[a] = b;
+        } else if (rank[a] > rank[b]) {
+            parent[b] = a;
         } else {
-            update_union(b_set, a_set);
-            rank[a_set] = rank[a_set] + 1;
+            parent[b] = a;
+            rank[a] = rank[a] + 1;
         }
-    }
-    // change merge behaviour here
-    void update_union(int a, int b){ // merge a into b
-        parent[a] = b;
     }
 };
 ```
@@ -866,103 +777,92 @@ Usage:
 - recover() (optional) 
 
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
+using ll = long long;
+using ii = pair<ll,ll>;
 
-const int N = 1e5+1, INF = 1e9;
-struct edge {int v, c, f;};
+namespace dinic {
+    const ll N=1e5+5, INF=1e9;
+    struct edge{ll v, c, f;};
 
-int src, snk, h[N], ptr[N];
-vector<edge> edgs;
-vector<int> g[N];
+    ll src, snk, h[N], ptr[N];
+    vector<edge> edgs;
 
-void add_edge (int u, int v, int c) {
-  int k = edgs.size();
-  edgs.push_back({v, c, 0});
-  edgs.push_back({u, 0, 0});
-  g[u].push_back(k);
-  g[v].push_back(k+1);
-}
+    vector<ll> g[N];
 
-void clear() {
-    memset(h, 0, sizeof h);
-    memset(ptr, 0, sizeof ptr);
-    edgs.clear();
-    for (int i = 0; i < N; i++) g[i].clear();
-    src = 0;
-    snk = N-1;
-}
-
-bool bfs() {
-  memset(h, 0, sizeof h);
-  queue<int> q;
-  h[src] = 1;
-  q.push(src);
-  while(!q.empty()) {
-    int u = q.front(); q.pop();
-    for(int i : g[u]) {
-      int v = edgs[i].v;
-      if (!h[v] and edgs[i].f < edgs[i].c)
-        q.push(v), h[v] = h[u] + 1;
+    void add_edge(ll u, ll v, ll c) {
+        ll k=edgs.size();
+        edgs.push_back({v,c,0});
+        edgs.push_back({u,0,0});
+        g[u].push_back(k);
+        g[v].push_back(k+1);
     }
-  }
-  return h[snk];
-}
 
-int dfs (int u, int flow) {
-  if (!flow or u == snk) return flow;
-  for (int &i = ptr[u]; i < g[u].size(); ++i) {
-    edge &dir = edgs[g[u][i]], &rev = edgs[g[u][i]^1];
-    int v = dir.v;
-    if (h[v] != h[u] + 1)  continue;
-    int inc = min(flow, dir.c - dir.f);
-    inc = dfs(v, inc);
-    if (inc) {
-      dir.f += inc, rev.f -= inc;
-      return inc;
+    void clear() {
+        memset(h, 0, sizeof(h));
+        memset(ptr,0,sizeof(ptr));
+        edgs.clear();
+        for(ll i=0;i<N;i++) g[i].clear();
+        src=0;
+        snk=N-1;
     }
-  }
-  return 0;
-}
 
-int dinic() {
-  int flow = 0;
-  while (bfs()) {
-    memset(ptr, 0, sizeof ptr);
-    while (int inc = dfs(src, INF)) flow += inc;
-  }
-  return flow;
-}
-
-//Recover Dinic
-void recover(){
-  for(int i = 0; i < edgs.size(); i += 2){
-    //edge (u -> v) is being used with flow f
-    if(edgs[i].f > 0) {
-      int v = edgs[i].v;
-      int u = edgs[i^1].v;
+    bool bfs() {
+        memset(h, 0, sizeof(h));
+        queue<ll> q;
+        h[src]=1;
+        q.push(src);
+        while(!q.empty()){
+            ll u=q.front();q.pop();
+            for(ll i:g[u]){
+                ll v=edgs[i].v;
+                if(!h[v]&&edgs[i].f<edgs[i].c)
+                    q.push(v),h[v]=h[u]+1;
+            }
+        }
+        return h[snk];
     }
-  }
+
+    ll dfs(ll u, ll flow){
+        if(!flow or u==snk) return flow;
+        for(ll &i=ptr[u];i<g[u].size();i++){
+            edge &dir=edgs[g[u][i]],&rev=edgs[g[u][i]^1];
+            ll v=dir.v;
+            if(h[v]!=h[u]+1) continue;
+            ll inc=min(flow,dir.c-dir.f);
+            inc=dfs(v,inc);
+            if(inc){
+                dir.f+=inc,rev.f-=inc;
+                return inc;
+            }
+        }
+        return 0;
+    }
+
+    ll dinic(){
+        ll flow=0;
+        while(bfs()){
+            memset(ptr,0,sizeof(ptr));
+            while(ll inc=dfs(src,INF))
+                flow += inc;
+        }
+        return flow;
+    }
+
+    vector<pair<ii,ll>> recover() {
+        vector<pair<ii,ll>> res;
+        for(ll i=0;i<edgs.size();i+=2){
+            if(edgs[i].f>0){
+                ll v=edgs[i].v;
+                ll u=edgs[i^1].v;
+                res.push_back({{u,v},edgs[i].f});
+            }
+        }
+        return res;
+    }
 }
 
-
-int main () {
-    // TEST CASE
-    d::clear();
-    d::add_edge(d::src,1,1);
-    d::add_edge(d::src,2,1);
-    d::add_edge(d::src,2,1);
-    d::add_edge(d::src,2,1);
-
-    d::add_edge(2,3,d::INF);
-    d::add_edge(3,4,d::INF);
-
-    d::add_edge(1,d::snk,1);
-    d::add_edge(2,d::snk,1);
-    d::add_edge(3,d::snk,1);
-    d::add_edge(4,d::snk,1);
-    cout<<d::dinic()<<endl; // SHOULD OUTPUT 4
-    d::recover();
+int main() {
+    dinic::clear();
 }
 ```
 == Flow with demands
