@@ -29,6 +29,7 @@
 - [ ] Arbitrary Precision
 - [X] Fast Fourier Transform
 - [ ] Continued Fractions
+- [ ] System of Linear Equations
 
 == Data Structures
 
@@ -55,6 +56,27 @@
 
 == String Processing
 
+- [X] Z-function
+- [ ] Suffix array
+- [ ] KMP prefix function
+- [ ] Rabin-Karp
+
 == Graph algorithms
 
 - [X] Floyd-Warshall
+
+== Geometry
+
+- [ ] Dot product
+- [ ] Cross product
+- [ ] Line-Point distance
+- [ ] Shoelace formula
+- [ ] From segment to line
+- [ ] Line-Line intersection
+- [ ] Segment intersection
+- [ ] 3 points circle
+- [ ] Reflection & Rotation
+- [ ] Convex Hull
+- [ ] Point in Polygon test
+- [ ] Pick's Theorem
+- [ ] Closest pair of points
