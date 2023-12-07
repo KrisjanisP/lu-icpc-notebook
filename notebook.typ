@@ -2,21 +2,17 @@
 #set page(paper: "a4",flipped: true,margin: (x:1cm,y:1cm), numbering: "1 / 1")
 #set par(justify: true)
 #set document(title: "LU ICPC kladīte ;)",author: ("Krišjānis Petručeņa","Matīss Kristiņš", "Valters Kalniņš"))
-
-#show: columns.with(3, gutter: 1em)
+#set heading(numbering: "1.")
+#show: columns.with(3, gutter: 2em)
 
 #align(center)[#block(text(weight: 700, 1.75em, "LU ICPC kladīte ;)"))]
 #outline(indent: 2em)
-= Algebra
-#block( breakable: false,[
-== Sum formulas
-$ (a+b)^2=a^2 + 2"ab" + b^2 $
-$ sum_(k=1)^(n) k = frac(n(n + 1),2)  $
-$ sum_(k=1)^(n) k^2 = frac(n(n + 1)(2n + 1),6)  $
-$ sum_(k=1)^(n) k^3 = frac(n^2(n + 1)^2,4)  $
-$ sum_(k=1)^(n) k^4 = frac(n(n+1)(2n + 1)(3n^2 + 3n - 1),30) $
-])
 
+#colbreak()
+
+= Algebra
+
+#v(1em)
 
 #block( breakable: false,[
 
@@ -38,38 +34,68 @@ ll m_pow(ll base, ll exp, ll mod) {
 
 #block( breakable: false,[
 
-== Extended euclidean & modular division and inversion
+== Extended euclidean
+#label("gcd_ext")
+
+
+$ a dot x + b dot y = gcd(a, b) $
 
 ```cpp
-int gcdExt(int a, int b, int *x, int *y) {
-    if (a == 0){
-        *x = 0, *y = 1;
-        return b;
-    }  
+int gcd_ext(int a, int b, int& x, int& y) {
+    if (b == 0) {
+        x = 1; y = 0;
+        return a;
+    }
     int x1, y1;
-    int gcd = gcdExt(b%a, a, &x1, &y1);
-    *x = y1 - (b/a) * x1;
-    *y = x1;
-    return gcd;
+    int d = gcd(b, a % b, x1, y1);
+    x = y1;
+    y = x1 - y1 * (a / b);
+    return d;
 }
-int modInverse(int b, int m) {
+```
+
+== Modular inversion & division
+
+`gcd_ext` defined in #ref(label("gcd_ext"),).
+
+$ exists x (a dot x equiv 1 (mod m)) arrow.l.r.double "gcd"(a,m)=1 $ 
+
+```cpp
+int mod_inv(int b, int m) {
     int x, y;
-    int g = gcdExt(b, m, &x, &y);
+    int g = gcd_ext(b, m, &x, &y);
     if (g != 1) return -1;
     return (x%m + m) % m;
 }
-// modular division
 int m_divide(ll a, ll b, ll m) {
-    a = a % mod;
-    int inv = modInverse(b, m);
-    if (inv == -1)
-       return -1;
-    else
-       return (inv * a) % m;
+    int inv = mod_inv(b, m);
+    assert(inv != -1);
+    return (inv * (a % m)) % m;
 }
 ```
 ])
 
+#block( breakable: false,[
+== Linear Diophantine equation
+
+`gcd_ext` defined in #ref(label("gcd_ext"),).
+
+$ a dot x + b dot y = c $
+
+$ {x = x_0 + k dot frac(b,g)  ;  y = y_0 - k dot frac(a,g) } $
+
+```cpp
+bool find_x0_y0(int a, int b, int c, int &x0, int &y0, int &g) {
+    g = gcd_ext(abs(a), abs(b), x0, y0);
+    if (c % g) return false;
+    x0 *= c / g;
+    y0 *= c / g;
+    if (a < 0) x0 = -x0;
+    if (b < 0) y0 = -y0;
+    return true;
+}
+```
+])
 
 #block( breakable: false,[
 

@@ -2,7 +2,7 @@
 
 - [X] Binary Exponention
 - [X] Extended Euclidean
-- [ ] Linear Diophantine
+- [X] Linear Diophantine
 - [X] Linear Sieve
 - [ ] Miller Rabin (deterministic)
 - [ ] Pollard Rho
