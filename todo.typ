@@ -10,7 +10,7 @@
 - [X] Modular Inverse
 - [ ] Chinese Remainder Theorem
 - [ ] Garner's Algorithm
-- [X] Factorial modulo p
+- [ ] Factorial modulo p
 - [ ] Discrete Logarithm
 - [ ] Primitive Root
 - [ ] Discrete Root
@@ -47,3 +47,7 @@
 - [X] SOS DP (Sum over Subsets)
 
 == String Processing
+
+== Graph algorithms
+
+- [X] Floyd-Warshall
