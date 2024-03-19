@@ -361,6 +361,18 @@ bool do_intersect(Point p1, Point q1, Point p2, Point q2)
 ])
 
 #block(breakable: false,[
+== Heron's formula
+Let $a$, $b$, $c$ - sides of a triangle. Then the area $A$ is:
+
+$ A = 1/4sqrt((a+b+c)(-a+b+c)(a-b+c)(a+b-c)) =\ 1/4sqrt(4a^2b^2-(a^2+b^2-c^2)^2) $
+
+Numerically stable version:
+
+$ a >= b >= c,  A = 1/4sqrt((a+(b+c))(c-(a-b))(c+(a-b))(a+(b-c))) $
+
+])
+
+#block(breakable: false,[
 == Graham's scan
 
 ```cpp
