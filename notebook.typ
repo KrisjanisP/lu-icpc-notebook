@@ -407,7 +407,15 @@ void convex_hull(vector<pt>& a, bool include_collinear = false) {
 ```
 ])
 
+#block(breakable: false,[
+== Circumradius
+Let $a$, $b$, $c$ - sides of a triangle. $A$ - area of the triangle. Then the circumradius is:
+
+$ R = (a b c)/(4A) $
+])
+
 #colbreak()
+
 
 = Data structures
 
