@@ -1412,3 +1412,50 @@ for (int i = 0; i < bits; i++) {
 }
 ```
 ])
+= General
+== Simulated annealing
+```cpp
+
+const ld T = (ld)2000;
+const ld alpha = 0.999999;
+// (new_score - old_score) / (temperature_final) ~ 10 works well
+
+const ld L = (ld)1e6;
+ld small_rand(){
+	return ((ld)gen(L))/L;
+}
+
+ld P(ld old, ld nw, ld temp){
+	if(nw > old)
+		return 1.0;
+	return exp((nw-old)/temp);
+}
+
+{
+  auto start = chrono::steady_clock::now();
+  ld time_limit = 2000; 
+  ld temperature = T;
+  ld max_score = -1;
+
+  while(elapsed_time < time_limit){
+    auto cur = chrono::steady_clock::now();
+    elapsed_time = chrono::duration_cast<chrono::milliseconds>(cur - start).count();
+    temperature *= alpha;
+    
+    // try a neighboring state
+    // ....
+    // ....
+
+    old_score = score(old_state);  
+    new_score = score(new_state);
+    if(P(old_score, new_score, temperature) >= small_rand()){
+      old_state = new_state;
+      old_score = new_score;
+    }
+    if(old_score > max_score){
+      max_score = old_score;
+      max_state = old_state;
+    }
+  }
+}
+```
