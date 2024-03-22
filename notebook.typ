@@ -1,9 +1,21 @@
 #set text(size: 8pt,font: "New Computer Modern",)
-#set page(paper: "a4",flipped: true,margin: (x:1cm,y:1cm), numbering: "1 / 1")
+#set page(paper: "a4",flipped: true,margin: (x:1cm,y:1cm))
+#set page(header: context [
+#block(inset:5pt)[
+  *University of Latvia*
+  #h(1fr)
+  #counter(page).display(
+    "1/1",
+    both: true,
+  )
+]
+])
+
 #set par(justify: true)
 #set document(title: "LU ICPC kladīte ;)",author: ("Krišjānis Petručeņa","Matīss Kristiņš", "Valters Kalniņš"))
 #set heading(numbering: "1.")
 #show: columns.with(3, gutter: 2em)
+
 
 #show heading.where(
   level: 1
