@@ -14,8 +14,8 @@
 #set par(justify: true)
 #set document(title: "LU ICPC kladīte ;)",author: ("Krišjānis Petručeņa","Matīss Kristiņš", "Valters Kalniņš"))
 #set heading(numbering: "1.")
-#show: columns.with(3, gutter: 2em)
-
+// #show: columns.with(3, gutter: 2em)
+#columns(3, gutter: 2em)[
 
 #show heading.where(
   level: 1
@@ -66,9 +66,9 @@ sort(fracs.begin(), fracs.end(),
 });
 ```
 
+#block( breakable: false,[
 = Algebra
 
-#block( breakable: false,[
 
 == Binary exponentiation
 
@@ -438,7 +438,54 @@ Let $a$, $b$, $c$ - sides of a triangle. $A$ - area of the triangle. Then the ci
 $ R = (a b c)/(4A) $
 ])
 
-#colbreak()
+
+#block(breakable: false,[
+
+== Closest pair of points
+
+```cpp
+double mindist;
+pair<int, int> best_pair;
+
+void upd_ans(const pt & a, const pt & b) {
+    double dist = sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+    if (dist < mindist) {
+        mindist = dist;
+        best_pair = {a.id, b.id};
+    }
+}
+vector<pt> t;
+
+void rec(int l, int r) {
+    if (r - l <= 3) {
+        for (int i = l; i < r; ++i) {
+            for (int j = i + 1; j < r; ++j) {
+                upd_ans(a[i], a[j]);
+            }
+        }
+        sort(a.begin() + l, a.begin() + r, cmp_y());
+        return;
+    }
+
+    int m = (l + r) >> 1;
+    int midx = a[m].x;
+    rec(l, m);
+    rec(m, r);
+
+    merge(a.begin() + l, a.begin() + m, a.begin() + m, a.begin() + r, t.begin(), cmp_y());
+    copy(t.begin(), t.begin() + r - l, a.begin() + l);
+
+    int tsz = 0;
+    for (int i = l; i < r; ++i) {
+        if (abs(a[i].x - midx) < mindist) {
+            for (int j = tsz - 1; j >= 0 && a[i].y - t[j].y < mindist; --j)
+                upd_ans(a[i], t[j]);
+            t[tsz++] = a[i];
+        }
+    }
+}
+```
+])
 
 
 = Data structures
@@ -1515,3 +1562,75 @@ ld P(ld old, ld nw, ld temp){
   }
 }
 ```
+]
+#columns(2)[
+#block( breakable: false,[
+== Eulerian Path
+
+#image("./eulerian-path.png", width: 100%)
+])
+
+#block(breakable: false)[
+== Flows with demands
+
+#image("./flows-with-demands.png", width: 100%)
+]
+
+#block( breakable: false,[
+== Point in convex polygon $O(log n)$
+
+#image("./point-in-convex-polygon.png", width: 100%)
+
+```cpp
+bool pointInTriangle(pt a, pt b, pt c, pt point) {
+    long long s1 = abs(a.cross(b, c));
+    long long s2 = abs(point.cross(a, b)) + abs(point.cross(b, c)) + abs(point.cross(c, a));
+    return s1 == s2;
+}
+
+void prepare(vector<pt> &points) {
+    n = points.size();
+    int pos = 0;
+    for (int i = 1; i < n; i++) {
+        if (lexComp(points[i], points[pos]))
+            pos = i;
+    }
+    rotate(points.begin(), points.begin() + pos, points.end());
+
+    n--;
+    seq.resize(n);
+    for (int i = 0; i < n; i++)
+        seq[i] = points[i + 1] - points[0];
+    translation = points[0];
+}
+```
+])
+#block(breakable: false,[
+```cpp
+bool pointInConvexPolygon(pt point) {
+    point = point - translation;
+    if (seq[0].cross(point) != 0 &&
+            sgn(seq[0].cross(point)) != sgn(seq[0].cross(seq[n - 1])))
+        return false;
+    if (seq[n - 1].cross(point) != 0 &&
+            sgn(seq[n - 1].cross(point)) != sgn(seq[n - 1].cross(seq[0])))
+        return false;
+
+    if (seq[0].cross(point) == 0)
+        return seq[0].sqrLen() >= point.sqrLen();
+
+    int l = 0, r = n - 1;
+    while (r - l > 1) {
+        int mid = (l + r) / 2;
+        int pos = mid;
+        if (seq[pos].cross(point) >= 0)
+            l = mid;
+        else
+            r = mid;
+    }
+    int pos = l;
+    return pointInTriangle(seq[pos], seq[pos + 1], pt(0, 0), point);
+}
+```
+])
+]
