@@ -1158,6 +1158,7 @@ vector<int> Blossom(vector<vector<int>> graph){
 ```
 ])
 
+#block(breakable: false,[
 = String Processing
 == Knuth-Morris-Pratt (KMP)
 
@@ -1184,6 +1185,7 @@ void kmp() {
   }
 }
 ```
+])
 
 #block( breakable: false,[
 == Suffix Array
