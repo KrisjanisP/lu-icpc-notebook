@@ -156,4 +156,61 @@ vector<pt> minkowski(vector<pt> P, vector<pt> Q){
 ```
 ])
 
+#block(breakable: false,[
+== janY template
+
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC target("avx2,bmi,bmi2,popcnt,lzcnt")
+#define fo(i,n) for(i=0;i<n;i++)
+#define Fo(i,k,n) for(i=k;k<n?i<n:i>n;k<n?i+=1:i-=1)
+#define ll long long
+#define ld long double
+#define all(x) x.begin(),x.end()
+#define sortall(x) sort(all(x))
+#define rev(x) reverse(x.begin(),x.end())
+#define fi first
+#define se second
+#define pb push_back
+#define PI 3.14159265359
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pl;
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<pii> vpii;
+typedef vector<pl> vpl;
+typedef vector<vi> vvi;
+typedef vector<vl> vvl;
+bool sortbysec(const pair<int,int> &a,const pair<int,int> &b){return a.second<b.second;}
+#define sortpairbysec(x) sort(all(x), sortbysec)
+bool sortcond(const pair<int,int> &a,const pair<int,int> &b){
+    if(a.fi!=b.fi) return a.fi<b.fi;
+    return a.se>b.se;
+}
+struct myComp {
+    constexpr bool operator()(pii const& a, pii const& b) const noexcept{
+        if(a.first!=b.first) return a.first<b.first;
+        return a.second>b.second;
+    }
+};
+const int mod=1000000007, N=3e5, M=N;
+// & - AND; | - OR; ^ - XOR
+vl a;
+ll n,m,k,q;
+void solve(int tc){
+    int i,j;
+    cin>>n;
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0); cout.tie(0);
+    int t=1; cin>>t; int i;
+    fo(i,t) solve(i+1);
+    return 0;
+}
+```
+])
+
 ]

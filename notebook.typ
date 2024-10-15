@@ -29,34 +29,36 @@
 #align(center)[#block(text(weight: 700, 1.75em, "LU ICPC kladīte ;)"))]
 #outline(indent: 2em)
 
-#include "cpplang.typ"
+#colbreak()
+
+#include "1-cpplang.typ"
 
 #colbreak()
 
-#include "algebra.typ"
+#include "2-algebra.typ"
 
 #colbreak()
 
-#include "geometry.typ"
+#include "3-geometry.typ"
 
 #colbreak()
 
-#include "structures.typ"
+#include "4-structures.typ"
 
 #colbreak()
 
-#include "graph.typ"
+#include "5-graph.typ"
 
 #colbreak()
 
-#include "strings.typ"
+#include "6-strings.typ"
 
 #colbreak()
 
-#include "dynamic.typ"
+#include "7-dynamic.typ"
 
 #colbreak()
 
 ]
 
-#include "other.typ"
+#include "8-other.typ"

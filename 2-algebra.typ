@@ -278,3 +278,79 @@ int main() {
 }
 ```
 ])
+
+== janY modulo operations
+
+```cpp
+int mod;
+int mod_f(long long a){
+    return ((a%mod)+mod)%mod;
+}
+int m_add(long long a, long long b){
+    return mod_f(mod_f(a)+mod_f(b));
+}
+int m_mult(long long a, long long b){
+    return mod_f(mod_f(a)*mod_f(b));
+}
+int gcdExt(int a, int b, int *x, int *y){
+    if(a==0){*x=0; *y=1; return b;}
+    int x1,y1, gcd = gcdExt(b%a,a,&x1,&y1);
+    *x = y1 - (b/a)*x1;
+    *y = x1;
+    return gcd;
+}
+int modInverse(int b, int m){
+    int x,y, g = gcdExt(b,m,&x,&y);
+    if(g!=1) return -1;
+    return (x%m + m)%m;
+}
+int m_divide(long long a, long long b){
+    a %= mod;
+    int inv = modInverse(b, mod);
+    return inv == -1 ? -1 : (1LL * inv * a) % mod;
+}
+int m_pow(long long base, long long exp){
+    base %= mod; int res=1;
+    while(exp>0){
+        if(exp&1) res=(1LL*res*base)%mod;
+        base=(1LL*base*base)%mod; exp >>=1;
+    }
+    return res;
+}
+```
+
+== janY combinatorics
+
+```cpp
+// COMBINATORICS
+long long nPr(long long n, long long r){
+    if(r>n) return 0;
+    if(n-r < r) r = n-r;
+    long long res=1; for(long long i=0;i<r;i++) res *= (n--);
+    return res;
+}
+long long nCr(long long n, long long r){
+    if(r>n) return 0;
+    if(n-r < r) r = n-r;
+    long long res=1; for(long long i=0;i<r;i++) res *= (n--);
+    for(long long i=1;i<=r;i++) res /= i;
+    return res;
+}
+// Fast nCr with precalc_fact
+int MAX_CHOOSE=3e5;
+vector<long long> inverse_fact(MAX_CHOOSE+5), fact(MAX_CHOOSE+5);
+long long fast_nCr(long long n, long long r){
+    if(n<r || r<0) return 0;
+    return m_mult(m_mult(fact[n], inverse_fact[r]),
+        inverse_fact[n-r]);
+}
+void precalc_fact(int n){
+    fact[0]=fact[1]=1;
+    
+    for(long long i=2;i<=n;i++) fact[i]=(fact[i-1]*i)%mod;
+    inverse_fact[0]=inverse_fact[1]=1;
+    
+    for(long long i=2;i<=n;i++)
+    inverse_fact[i]=(modInverse(i,mod)*inverse_fact[i-1])%mod;
+}
+```
