@@ -29,8 +29,6 @@
 #align(center)[#block(text(weight: 700, 1.75em, "LU ICPC kladīte ;)"))]
 #outline(indent: 2em)
 
-#colbreak()
-
 #include "1-cpplang.typ"
 
 #colbreak()

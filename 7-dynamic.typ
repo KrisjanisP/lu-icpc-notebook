@@ -107,31 +107,27 @@ for (int i = 0; i < n; ++i) {
   // increasing: lower_bound
   // non-decreasing: upper_bound
   int j = lower_bound(dp, dp + lis, v[i]) - dp;
-  dp[j] = min(dp[j], v[i]);
-  lis = max(lis, j + 1);
+  dp[j] = min(dp[j], v[i]); lis = max(lis, j + 1);
 }
 ```
 ])
 
 #block( breakable: false,[
 == SOS DP (Sum over Subsets)
+
+
+
+Sum over subsets (SOS) DP trick efficiently computes the sum of all the subsets of an array with time complexity $O("bits" dot 2^"bits")$.
+
 ```cpp
-// O(bits*(2^bits)) 
-
 const int bits = 20;
-
 vector<int> a(1<<bits); // initial value of each subset
 vector<int> f(1<<bits); // sum over all subsets 
 // (at f[011] = a[011]+a[001]+a[010]+a[000])
-
-for (int i = 0; i<(1<<bits); i++){ 
-    f[i] = a[i];
-}
+for (int i = 0; i<(1<<bits); i++){f[i] = a[i];}
 for (int i = 0; i < bits; i++) {
   for(int mask = 0; mask < (1<<bits); mask++){
-    if(mask & (1<<i)){
-        f[mask] += f[mask^(1<<i)];
-    }
+    if(mask & (1<<i)){f[mask] += f[mask^(1<<i)];}
   }
 }
 ```
