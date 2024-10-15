@@ -111,22 +111,16 @@ If the denominator equals zero, the lines are parallel or coincident.
 == Check if two segments intersect
 
 ```cpp
-bool on_segment(Point p, Point q, Point r) { 
+bool on_seg(Point p, Point q, Point r) { 
     return (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) && 
         q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y)) 
 } 
-
 bool do_intersect(Point p1, Point q1, Point p2, Point q2){ 
-    int o1 = orientation(p1, q1, p2); 
-    int o2 = orientation(p1, q1, q2); 
-    int o3 = orientation(p2, q2, p1); 
-    int o4 = orientation(p2, q2, q1); 
+    int o1 = orient(p1, q1, p2), o2 = orient(p1, q1, q2);
+    int o3 = orient(p2, q2, p1), o4 = orient(p2, q2, q1);
     if (o1 != o2 && o3 != o4) return true;
-    if (o1 == 0 && on_segment(p1, p2, q1)) return true; 
-    if (o2 == 0 && on_segment(p1, q2, q1)) return true; 
-    if (o3 == 0 && on_segment(p2, p1, q2)) return true; 
-    if (o4 == 0 && on_segment(p2, q1, q2)) return true; 
-    return false;
+    return (o1==0&&on_seg(p1,p2,q1))||(o2==0&&on_seg(p1,q2,q1))||
+           (o3==0&&on_seg(p2,p1,q2))||(o4==0&&on_seg(p2,q1,q2));
 } 
 ```
 ])
@@ -189,14 +183,6 @@ void convex_hull(vector<pt>& a, bool include_collinear = false) {
 }
 ```
 ])
-
-#block(breakable: false,[
-== Circumradius
-Let $a$, $b$, $c$ - sides of a triangle. $A$ - area of the triangle. Then the circumradius is:
-
-$ R = (a b c)/(4A) $
-])
-
 
 #block(breakable: false,[
 
