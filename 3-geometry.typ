@@ -141,45 +141,29 @@ $ a >= b >= c,  A = 1/4sqrt((a+(b+c))(c-(a-b))(c+(a-b))(a+(b-c))) $
 == Graham's scan
 
 ```cpp
-struct pt {double x, y;};
-int orientation(pt a, pt b, pt c) {
-    double v = a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y);
-    if (v < 0) return -1; // clockwise
-    if (v > 0) return +1; // counter-clockwise
-    return 0;
-}
-
-bool cw(pt a, pt b, pt c, bool include_collinear) {
-    int o = orientation(a, b, c);
-    return o < 0 || (include_collinear && o == 0);
-}
-bool collinear(pt a, pt b, pt c) { return orientation(a, b, c) == 0; }
-
-void convex_hull(vector<pt>& a, bool include_collinear = false) {
-    pt p0 = *min_element(a.begin(), a.end(), [](pt a, pt b) {
-        return make_pair(a.y, a.x) < make_pair(b.y, b.x);
+void convex_hull(vector<pt>&a, bool coll=false){
+    pt p = *min_element(all(a), [](const pt&x, const pt&y){
+        return make_pair(x.y, x.x) < make_pair(y.y, y.x);
     });
-    sort(a.begin(), a.end(), [&p0](const pt& a, const pt& b) {
-        int o = orientation(p0, a, b);
-        if (o == 0)
-            return (p0.x-a.x)*(p0.x-a.x) + (p0.y-a.y)*(p0.y-a.y)
-                < (p0.x-b.x)*(p0.x-b.x) + (p0.y-b.y)*(p0.y-b.y);
-        return o < 0;
+    sort(all(a), [](const pt&x, const pt&y){
+        int ori = orientation(p, x, y);
+        if(ori == 0)
+            return (p.x-x.x)*(p.x-x.x) + (p.y-x.y)*(p.y-x.y) <
+                   (p.x-y.x)*(p.x-y.x) + (p.y-y.y)*(p.y-y.y);
+        return ori < 0;
     });
-    if (include_collinear) {
-        int i = (int)a.size()-1;
-        while (i >= 0 && collinear(p0, a[i], a.back())) i--;
-        reverse(a.begin()+i+1, a.end());
+    if(coll){
+        int i = a.size()-1; while(i>=0 &&
+            collinear(a[i], a.back(), p)) i--;
+        reverse(a.b()+i+1, a.e());
     }
-
-    vector<pt> st;
-    for (int i = 0; i < (int)a.size(); i++) {
-        while (st.size() > 1 && !cw(st[st.size()-2], st.back(), a[i], include_collinear))
-            st.pop_back();
-        st.push_back(a[i]);
+    vector<pt> s; 
+    for(auto &p : a){
+        while(s.size() > 1 &&
+            !cw(s[s.size()-2], s.back(), p, coll)) s.pop_back();
+        s.push_back(p);
     }
-
-    a = st;
+    a = s;
 }
 ```
 ])
@@ -189,44 +173,26 @@ void convex_hull(vector<pt>& a, bool include_collinear = false) {
 == Closest pair of points
 
 ```cpp
-double mindist;
-pair<int, int> best_pair;
-
-void upd_ans(const pt & a, const pt & b) {
-    double dist = sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
-    if (dist < mindist) {
-        mindist = dist;
-        best_pair = {a.id, b.id};
-    }
+struct pt { ld x, y; int id; };
+ld md; pair<int,int> bp; vector<pt> a, t;
+void ua(const pt&a1, const pt&b1){ // update answer
+    ld d=sqrtl((a1.x-b1.x)*(a1.x-b1.x)+(a1.y-b1.y)*(a1.y-b1.y));
+    if(d<md){md=d; bp={a1.id,b1.id};}
 }
-vector<pt> t;
-
-void rec(int l, int r) {
-    if (r - l <= 3) {
-        for (int i = l; i < r; ++i) {
-            for (int j = i + 1; j < r; ++j) {
-                upd_ans(a[i], a[j]);
-            }
-        }
-        sort(a.begin() + l, a.begin() + r, cmp_y());
-        return;
-    }
-
-    int m = (l + r) >> 1;
-    int midx = a[m].x;
-    rec(l, m);
-    rec(m, r);
-
-    merge(a.begin() + l, a.begin() + m, a.begin() + m, a.begin() + r, t.begin(), cmp_y());
-    copy(t.begin(), t.begin() + r - l, a.begin() + l);
-
-    int tsz = 0;
-    for (int i = l; i < r; ++i) {
-        if (abs(a[i].x - midx) < mindist) {
-            for (int j = tsz - 1; j >= 0 && a[i].y - t[j].y < mindist; --j)
-                upd_ans(a[i], t[j]);
-            t[tsz++] = a[i];
-        }
+void rec(int l, int r){ // recursive function
+    if(r - l <= 3){
+        rep(i, l, r) rep(j, i+1, r) ua(a[i], a[j]);
+        sort(a.b()+l, a.b()+r,
+            [](const pt&x, const pt&y){return x.y<y.y;});
+        return;}
+    int m = (l + r) >> 1, midx = a[m].x; 
+    rec(l, m); rec(m, r);
+    merge(a.b()+l, a.b()+m, a.b()+m, a.b()+r, t.b(),
+        [](const pt&x, const pt&y){return x.y<y.y;});
+    copy(t.b(), t.b()+r-l, a.b()+l);
+    int ts = 0; rep(i, l, r) if(abs(a[i].x - midx) < md){
+        for(int j=ts-1;j>=0&&a[i].y-t[j].y<md;j--)ua(a[i],t[j]);
+        t[ts++] = a[i];
     }
 }
 ```
