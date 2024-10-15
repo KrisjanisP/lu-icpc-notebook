@@ -139,7 +139,7 @@ $ a >= b >= c,  A = 1/4sqrt((a+(b+c))(c-(a-b))(c+(a-b))(a+(b-c))) $
 
 #block(breakable: false,[
 == Graham's scan
-
+Constructs convex hull of a set of points.
 ```cpp
 void convex_hull(vector<pt>&a, bool coll=false){
     pt p = *min_element(all(a), [](const pt&x, const pt&y){
@@ -171,7 +171,7 @@ void convex_hull(vector<pt>&a, bool coll=false){
 #block(breakable: false,[
 
 == Closest pair of points
-
+Finds pair of points with minimum euclidean distance.
 ```cpp
 struct pt { ld x, y; int id; };
 ld md; pair<int,int> bp; vector<pt> a, t;
