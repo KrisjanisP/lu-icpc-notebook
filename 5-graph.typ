@@ -212,6 +212,8 @@ void kosaraju(){
   for (int i = ordn - 1; i >= 0; --i) if (vis[ord[i]]) scc_cnt++, dfst(ord[i]);
 }
 ```
+
+#raw(read("algorithms/kosaraju.cpp").slice(0,100), lang:"cpp")
 ])
 
 #block( breakable: false,[
