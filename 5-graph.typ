@@ -180,40 +180,66 @@ Finding Min Flow
 - Min flow = $S(L)$ that arrives in Old Sink + flow that leaves (Old Sink -> Old Source)
 
 #block( breakable: false,[
-== Kosaraju's algorithm
+== Kosaraju's SCCs
+
+#text(fill:blue, link("https://judge.yosupo.jp/submission/252308"))
 
 ```cpp
-const int N = 2e5 + 5;
-
-vector<int> adj[N], adjt[N];
-int n, ordn, scc_cnt, vis[N], ord[N], scc[N];
-
-//Directed Version
-void dfs(int u) {
-  vis[u] = 1;
-  for (auto v : adj[u]) if (!vis[v]) dfs(v);
-  ord[ordn++] = u;
+namespace kosaraju {
+  vi adj[MAX_N], adjt[MAX_N], topo;
+  bitset<MAX_N> vis;
+  vvi res;
+  // first dfs to get topological order
+  void visit(int v) {
+      vis[v]=1;
+      for(int u: adj[v]) if(!vis[u]) visit(u);
+      topo.pb(v);
+  }
+  // second dfs on transpose graph
+  void assign(int v, int r) {
+      vis[v]=0; res.back().pb(v);
+      for(int u: adjt[v]) if(vis[u]) assign(u,r);
+  }
+  /// @param el 0-indexed edge list
+  /// @param n graph node count
+  vvi sccs(vpii el, int n){
+      rep(i,MAX_N) adj[i].clear(), adjt[i].clear();
+      topo.clear(); res.clear();
+      for(pii e: el) adj[e.fi].pb(e.se), adjt[e.se].pb(e.fi);
+      // topological order
+      rep(i,n) if(!vis[i]) visit(i);
+      reverse(all(topo));
+      rep(i,n) { // sccs on transpose (reversed) graph
+          int v=topo[i];
+          if(vis[v]) res.push_back({}), assign(v,v);
+      }
+      return res;
+  }
+  void test() {
+      vpii edges={{1,4},{5,2},{3,0},{5,5},{4,1},{0,3},{4,2}};
+      vvi expected={{5},{1,4},{2},{0,3}};
+      assert(kosaraju::sccs(edges, 6)==expected);
+  }
 }
+int main() {
+    kosaraju::test();
 
-void dfst(int u) {
-  scc[u] = scc_cnt, vis[u] = 0;
-  for (auto v : adjt[u]) if (vis[v]) dfst(v);
-}
-
-// add edge: u -> v
-void add_edge(int u, int v){
-  adj[u].push_back(v);
-  adjt[v].push_back(u);
-}
-
-// run kosaraju
-void kosaraju(){
-  for (int i = 1; i <= n; ++i) if (!vis[i]) dfs(i);
-  for (int i = ordn - 1; i >= 0; --i) if (vis[ord[i]]) scc_cnt++, dfst(ord[i]);
+    ios::sync_with_stdio(false);
+    int n, m; cin>>n>>m;
+    vpii el;
+    for(int i=0;i<m;i++){
+        int a, b; cin>>a>>b;
+        el.push_back({a,b});
+    }
+    vvi sccs=kosaraju::sccs(el, n);
+    cout<<sccs.size()<<"\n";
+    for(vi scc: sccs) {
+        cout<<scc.size()<<" ";
+        for(int v: scc) cout<<v<<" ";
+        cout<<endl;
+    }
 }
 ```
-
-#raw(read("algorithms/kosaraju.cpp").slice(0,100), lang:"cpp")
 ])
 
 #block( breakable: false,[
