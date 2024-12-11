@@ -31,7 +31,6 @@
 
 #include "1-cpplang.typ"
 
-#colbreak()
 
 #include "2-algebra.typ"
 

@@ -179,22 +179,26 @@ Finding Min Flow
 - The cost of this edge represents all the flow from old network
 - Min flow = $S(L)$ that arrives in Old Sink + flow that leaves (Old Sink -> Old Source)
 
-#block( breakable: false,[
 == Kosaraju's SCCs
 
+#block( breakable: false,[
 #text(fill:blue, link("https://judge.yosupo.jp/submission/252308"))
+
+#image("./assets/sccs.png", width: 60%)
+
+12 minutes to implement and debug
 
 ```cpp
 namespace kosaraju {
   vi adj[MAX_N], adjt[MAX_N], topo;
   bitset<MAX_N> vis;
-  vvi res;
   // first dfs to get topological order
   void visit(int v) {
       vis[v]=1;
       for(int u: adj[v]) if(!vis[u]) visit(u);
       topo.pb(v);
   }
+  vvi res;
   // second dfs on transpose graph
   void assign(int v, int r) {
       vis[v]=0; res.back().pb(v);
@@ -203,7 +207,7 @@ namespace kosaraju {
   /// @param el 0-indexed edge list
   /// @param n graph node count
   vvi sccs(vpii el, int n){
-      rep(i,MAX_N) adj[i].clear(), adjt[i].clear();
+      rep(i,n) adj[i].clear(), adjt[i].clear();
       topo.clear(); res.clear();
       for(pii e: el) adj[e.fi].pb(e.se), adjt[e.se].pb(e.fi);
       // topological order
@@ -221,26 +225,9 @@ namespace kosaraju {
       assert(kosaraju::sccs(edges, 6)==expected);
   }
 }
-int main() {
-    kosaraju::test();
-
-    ios::sync_with_stdio(false);
-    int n, m; cin>>n>>m;
-    vpii el;
-    for(int i=0;i<m;i++){
-        int a, b; cin>>a>>b;
-        el.push_back({a,b});
-    }
-    vvi sccs=kosaraju::sccs(el, n);
-    cout<<sccs.size()<<"\n";
-    for(vi scc: sccs) {
-        cout<<scc.size()<<" ";
-        for(int v: scc) cout<<v<<" ";
-        cout<<endl;
-    }
-}
 ```
 ])
+
 
 #block( breakable: false,[
 == Lowest Common Ancestor
