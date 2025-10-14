@@ -46,7 +46,7 @@ ld P(ld old, ld nw, ld temp){
   }
 }
 ```
-]
+
 #columns(2)[
 #block( breakable: false,[
 == Eulerian Path

@@ -89,14 +89,52 @@ $ ( P_y-Q_y)x + (Q_x-P_x)y + (P_x Q_y - P_y Q_x) = 0 $
 
 ])
 
+== Plane quadrants
+
+```cpp
+int quadrant(P p) {
+    // origin
+    if(p.x==0&&p.y==0) return 0;
+    // quadrants
+    if(p.x>0&&p.y>0) return 1;
+    if(p.x<0&&p.y>0) return 2;
+    if(p.x<0&&p.y<0) return 3;
+    if(p.x>0&&p.y<0) return 4;
+    // x-axes
+    if(p.x>0&&p.y==0) return 5;
+    if(p.x<0&&p.y==0) return 6;
+    // y-axes
+    if(p.x==0&&p.y>0) return 7;
+    if(p.x==0&&p.y<0) return 8;
+    assert(false);
+}
+
+// go CCW from third quadrant; end at neg x-axis
+int q_o[9]={3,5,7,0,2,4,8,6,1};
+```
+
+== Sort points CCW around origin
+
+```cpp
+sort(p, p+n, [](P a, P b) {
+    int q_a = quadrant(a), q_b = quadrant(b);
+    if(q_a != q_b) return q_o[q_a] < q_o[q_b];
+    int o = orientation(P{0,0}, a, b);
+    if(o != COL) return o == CCW;
+    else return a.dist_sq() < b.dist_sq();
+});
+```
+
 == Three point orientation
 
 ```cpp
-int orientation(Point p1, Point p2, Point p3){
-    int val = (p2.y-p1.y)*(p3.x-p2.x)-(p2.x-p1.x)*(p3.y-p2.y);
-    if (val == 0) return 0; // collinear
-    return (val > 0) ? 1 : 2; // clock or counterclock
-}```
+enum {COL, CW, CCW};
+int orientation(P p1, P p2, P p3) {
+    ll val = (p2.x-p1.x)*(p3.y-p2.y)-(p3.x-p2.x)*(p2.y-p1.y);
+    if(val==0) return COL;
+    return val > 0 ? CCW : CW;
+}
+```
 
 == Line-line intersection
 
