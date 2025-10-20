@@ -26,6 +26,8 @@ struct chash {
 gp_hash_table<key, int, chash> table;
 ```
 
+// from blog https://codeforces.com/blog/entry/11080
+
 ordered set with support for `find_by_order()` and `order_of_key()`
 
 ```cpp

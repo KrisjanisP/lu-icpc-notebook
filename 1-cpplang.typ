@@ -37,18 +37,34 @@ sort(fracs.begin(), fracs.end(),
 
 ])
 
-== Abbreviations
+== Some abbreviations
 
 ```cpp
 #define all(x) x.begin(), x.end()
 #define fi first
 #define se second
-#define rep(i,n) for(int i=0;i<n;i++)
 #define pb push_back
-using namespace std;
 using ll = long long;
-using vi = vector<int>;
+using vi = vector<ll>;
 using vvi = vector<vi>;
-using pii = pair<int, int>;
+using pii = pair<ll, ll>;
 using vpii = vector<pii>;
 ```
+
+== rand() is bad!
+// https://codeforces.com/blog/entry/61587
+
+rand() is bad. it may return up to RAND_MAX
+which by default may be only 32767
+
+```cpp
+int main() {
+    mt19937 rng(chrono::steady_clock::now()
+        .time_since_epoch().count());
+    vector<int> permutation(N);
+    for (int i = 0; i < N; i++) permutation[i] = i;
+    shuffle(permutation.begin(), permutation.end(), rng);
+}
+```
+
+for 64-bit, use `mt19937_64`
