@@ -1,5 +1,38 @@
 = Data structures
 
+== Policy-based data structures (PBDS)
+
+// from blog https://codeforces.com/blog/entry/60737
+
+preamble
+```cpp
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+using namespace std;
+```
+
+5x faster hash map
+```cpp
+gp_hash_table<int, int> table;
+```
+
+defeating anti-hash tests
+```cpp
+const int RANDOM = chrono::high_resolution_clock::now().time_since_epoch().count();
+struct chash {
+    int operator()(int x) const { return x ^ RANDOM; }
+};
+gp_hash_table<key, int, chash> table;
+```
+
+ordered set with support for `find_by_order()` and `order_of_key()`
+
+```cpp
+tree<int,null_type,less<int>,
+rb_tree_tag,tree_order_statistics_node_update> t;
+```
+
 #block(breakable:false,[
 == Treap
 
