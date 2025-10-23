@@ -90,23 +90,42 @@ $ ( P_y-Q_y)x + (Q_x-P_x)y + (P_x Q_y - P_y Q_x) = 0 $
 ])
 
 #block(breakable: false,[
-== Point OOP struct
+== 2D Point\<T\> struct
 ```cpp
+const ld eps=1e-12;
 template<typename T>
 struct Point{
-    typedef Point<T> P;
     T x,y;
-    T dist_sq() {return x*x + y*y;}
-    P operator-(P p){ return P{x-p.x,y-p.y};}
-    bool operator==(P rhs){ return x==rhs.x&&y==rhs.y;}
-    P perp() const {return P{-y, x}; } // +90 deg
+    typedef Point<T> P;
+    T dist_sq()const{return x*x + y*y;}
+    P operator-(P p)const{return P{x-p.x,y-p.y};}
+    P operator+(P p)const{return P{x+p.x,y+p.y};}
+    P operator*(T s)const{return P{x*s,y*s};}
+    bool operator==(P rhs)const{ // careful == with floats!
+        return fabs(x-rhs.x)<eps && fabs(y-rhs.y)<eps;}
+    bool operator<(const P &t)const{tie(x,y)<tie(t.x,t.y);}
+    P perp()const{return P{-y, x}; } // +90 degrees ccw
+    Point<ld> to_ld()const{return Point<ld>{ld(x), ld(y)};}
 };
-typedef Point<ll> P; // example usage afterwards
 ```
 ])
 
-== Sort points CCW around origin
 
+#block(breakable: false,[
+== Three point orientation
+```cpp
+typedef Point<ll> P;
+enum {COL, CW, CCW};
+int orientation(P p1, P p2, P p3) {
+    ll val = (p2.x-p1.x)*(p3.y-p2.y)-(p3.x-p2.x)*(p2.y-p1.y);
+    if(val==0) return COL;
+    return val > 0 ? CCW : CW;
+}
+```
+])
+
+#block(breakable: false,[
+== Sort points CCW around origin
 ```cpp
 // go ccw from 3rd quadrant; end at negative x-axis
 int quadrant_order(P p) {
@@ -115,7 +134,11 @@ int quadrant_order(P p) {
     static const int map[9] = { 0,1,2,8,3,4,7,6,5 };
     return map[(sy + 1) * 3 + (sx + 1)];
 }
+```
+])
 
+#block(breakable: false,[
+```cpp
 void sort_ccw(P points[], int n, P origin){
     sort(points, points+n, [origin](P a, P b) {
         a = a-origin, b = b-origin;
@@ -127,17 +150,28 @@ void sort_ccw(P points[], int n, P origin){
     });
 }
 ```
+])
 
-== Three point orientation
-
+#block(breakable: false,[
+== Circle-circle intersection
 ```cpp
-enum {COL, CW, CCW};
-int orientation(P p1, P p2, P p3) {
-    ll val = (p2.x-p1.x)*(p3.y-p2.y)-(p3.x-p2.x)*(p2.y-p1.y);
-    if(val==0) return COL;
-    return val > 0 ? CCW : CW;
+struct Circle{
+Point<ll> o; ll r;
+// circle-circle intersection
+vector<Point<ld>> operator & (const Circle& b){
+    if(o==b.o){assert(r!=b.r); return {};}
+    Point<ll> vec = b.o - o;
+    ll d2 = vec.dist_sq(), sum = r+b.r, dif = r-b.r;
+    if (sum*sum < d2 || dif*dif > d2) return {};
+    ld p = (d2 + r*r - b.r*b.r)/(ld)(d2*2), h2 = r*r - p*p*d2;
+    Point<ld> mid = o.to_ld() + vec.to_ld()*p;
+    if(h2<1e-12) return {mid};
+    Point<ld> per = vec.perp().to_ld() * sqrt(fmax(0, h2) / d2);
+    return {mid + per, mid - per};
 }
+};
 ```
+])
 
 == Line-line intersection
 
@@ -205,23 +239,6 @@ void convex_hull(vector<pt>&a, bool coll=false){
         s.push_back(p);
     }
     a = s;
-}
-```
-])
-
-#block(breakable: false, [
-== Circle-circle intersection
-```cpp
-typedef Point<double> P;
-bool circleInter(P a,P b,double r1,double r2,pair<P, P>* out) {
-if (a == b) { assert(r1 != r2); return false; }
-P vec = b - a;
-double d2 = vec.dist2(), sum = r1+r2, dif = r1-r2,
-p = (d2 + r1*r1 - r2*r2)/(d2*2), h2 = r1*r1 - p*p*d2;
-if (sum*sum < d2 || dif*dif > d2) return false;
-P mid = a + vec*p, per = vec.perp() * sqrt(fmax(0, h2) / d2);
-*out = {mid + per, mid - per};
-return true;
 }
 ```
 ])
