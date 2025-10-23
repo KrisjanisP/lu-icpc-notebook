@@ -69,12 +69,12 @@ In any triangle with sides $a$, $b$, $c$ and opposite angles $alpha$, $beta$, $g
 $ c^2 = a^2 + b^2 - 2 a b cos(gamma) $
 
 ])
-    
+
 #block(breakable: false,[
 == Median Length Formulas
-    
+
 In any triangle with sides $a$, $b$, $c$, the lengths of the medians $m_a$, $m_b$, $m_c$ from the respective vertices are given by:
-    
+
 $ m_a = frac(1, 2) sqrt(2b^2 + 2c^2 - a^2) $
 
 These formulas can be derived using the Apollonius's theorem.
@@ -87,6 +87,22 @@ Converting segment $((P_x,P_y),(Q_x,Q_y))$ to $A x + B y + C = 0$:
 
 $ ( P_y-Q_y)x + (Q_x-P_x)y + (P_x Q_y - P_y Q_x) = 0 $
 
+])
+
+#block(breakable: false,[
+== Point OOP struct
+```cpp
+template<typename T>
+struct Point{
+    typedef Point<T> P;
+    T x,y;
+    T dist_sq() {return x*x + y*y;}
+    P operator-(P p){ return P{x-p.x,y-p.y};}
+    bool operator==(P rhs){ return x==rhs.x&&y==rhs.y;}
+    P perp() const {return P{-y, x}; } // +90 deg
+};
+typedef Point<ll> P; // example usage afterwards
+```
 ])
 
 == Sort points CCW around origin
@@ -136,17 +152,17 @@ If the denominator equals zero, the lines are parallel or coincident.
 == Check if two segments intersect
 
 ```cpp
-bool on_seg(Point p, Point q, Point r) { 
-    return (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) && 
-        q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y)) 
-} 
-bool do_intersect(Point p1, Point q1, Point p2, Point q2){ 
+bool on_seg(Point p, Point q, Point r) {
+    return (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
+        q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y))
+}
+bool do_intersect(Point p1, Point q1, Point p2, Point q2){
     int o1 = orient(p1, q1, p2), o2 = orient(p1, q1, q2);
     int o3 = orient(p2, q2, p1), o4 = orient(p2, q2, q1);
     if (o1 != o2 && o3 != o4) return true;
     return (o1==0&&on_seg(p1,p2,q1))||(o2==0&&on_seg(p1,q2,q1))||
            (o3==0&&on_seg(p2,p1,q2))||(o4==0&&on_seg(p2,q1,q2));
-} 
+}
 ```
 ])
 
@@ -182,13 +198,30 @@ void convex_hull(vector<pt>&a, bool coll=false){
             collinear(a[i], a.back(), p)) i--;
         reverse(a.b()+i+1, a.e());
     }
-    vector<pt> s; 
+    vector<pt> s;
     for(auto &p : a){
         while(s.size() > 1 &&
             !cw(s[s.size()-2], s.back(), p, coll)) s.pop_back();
         s.push_back(p);
     }
     a = s;
+}
+```
+])
+
+#block(breakable: false, [
+== Circle-circle intersection
+```cpp
+typedef Point<double> P;
+bool circleInter(P a,P b,double r1,double r2,pair<P, P>* out) {
+if (a == b) { assert(r1 != r2); return false; }
+P vec = b - a;
+double d2 = vec.dist2(), sum = r1+r2, dif = r1-r2,
+p = (d2 + r1*r1 - r2*r2)/(d2*2), h2 = r1*r1 - p*p*d2;
+if (sum*sum < d2 || dif*dif > d2) return false;
+P mid = a + vec*p, per = vec.perp() * sqrt(fmax(0, h2) / d2);
+*out = {mid + per, mid - per};
+return true;
 }
 ```
 ])
@@ -210,7 +243,7 @@ void rec(int l, int r){ // recursive function
         sort(a.b()+l, a.b()+r,
             [](const pt&x, const pt&y){return x.y<y.y;});
         return;}
-    int m = (l + r) >> 1, midx = a[m].x; 
+    int m = (l + r) >> 1, midx = a[m].x;
     rec(l, m); rec(m, r);
     merge(a.b()+l, a.b()+m, a.b()+m, a.b()+r, t.b(),
         [](const pt&x, const pt&y){return x.y<y.y;});
@@ -222,4 +255,3 @@ void rec(int l, int r){ // recursive function
 }
 ```
 ])
-
